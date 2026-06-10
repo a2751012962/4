@@ -90,6 +90,59 @@ async function stageNight1(){
   setNight("第一晚 · 海之房");
   await chapterCard("第 一 晚","海 之 房 · 五扇门的走廊",0);
 
+  /* 电梯 */
+  await (async ()=>{
+    await screenType([
+      "大堂尽头只有一部电梯。",
+      "门开着，像是专门在等你。",
+      "你走进去，回头看按钮——",
+      "1、2、3、5、B4。",
+      "没有 4 层。"
+    ],"看 按 钮",58);
+    setStage(`
+      <div class="type-area" id="ta" style="min-height:70px;">电梯按钮在昏黄的灯下泛着旧铜色。</div>
+      <div class="lift-panel">
+        <button class="lift-btn" data-f="1">1</button>
+        <button class="lift-btn" data-f="2">2</button>
+        <button class="lift-btn" data-f="3">3</button>
+        <button class="lift-btn ghost" data-f="5">5</button>
+        <button class="lift-btn" data-f="B4" style="grid-column:1/3;width:100%;border-radius:32px;">B4 · 保管库</button>
+      </div>
+    `);
+    const lines={
+      "1":"按钮亮了一下，又灭了。电梯纹丝不动。",
+      "2":"按钮陷下去就没有弹起来。你听见电梯井深处，有人轻轻咳嗽了一声。",
+      "3":"灯闪了闪。楼层显示器上跳出一个字：「早」。现在是深夜。",
+      "B4":"按钮是锁着的。锁孔的形状——像两颗并排的橡子。"
+    };
+    let pressed=0;
+    await new Promise(res=>{
+      document.querySelectorAll('.lift-btn').forEach(b=>{
+        b.onclick=async ()=>{
+          const f=b.dataset.f;
+          if(f==="5"){
+            shake(); screenTear(); b.classList.add('dead');
+            $('ta').innerHTML="「5」字闪烁了几下，变成了「伍」。<br>电梯广播响了，是个很温柔的声音：<br>「该楼层不存在。请不要，再按了。」";
+            whisper("（广播的声音……为什么有点耳熟？）");
+          } else {
+            b.classList.add('dead');
+            $('ta').innerHTML=lines[f];
+            if(f==="B4") whisper("笃笃：嘿嘿，这把锁，回头我们给你开！", true);
+          }
+          pressed++;
+          if(pressed>=2){
+            await sleep(2600);
+            $('ta').innerHTML="——突然，所有按钮同时亮起。<br>电梯自己动了。<br>显示器上的数字不是楼层，是一个倒着走的年份：2026…2025…2024…";
+            document.querySelectorAll('.lift-btn').forEach(x=>x.classList.add('lit'));
+            sfx.thud(); await sleep(3600);
+            await blackoutSay(["「叮。」","「一层到了。访客您好——欢迎回到，故事开始的地方。」"]);
+            res();
+          }
+        };
+      });
+    });
+  })();
+
   /* 五扇门 */
   await (async ()=>{
     setStage(`
@@ -391,6 +444,64 @@ async function stageNight3(){
     await done;
   })();
 
+  /* 八音盒调音 */
+  await (async ()=>{
+    await screenType([
+      "墙壁深处，传来一段八音盒的声音。",
+      "是那首歌。但它走调了——和广播里一样。",
+      "连体衣熊把爪子贴在墙上：",
+      "「这是旅馆的心跳。它已经走调很久了。」",
+      "「帮它调回来。它会告诉你一个秘密。」"
+    ],"打 开 墙 板",58);
+    const NOTES=[262,294,330,392,440];
+    const NAMES=["do","re","mi","sol","la"];
+    const target=[2,4,3,1];
+    const cur=[0,0,0,0];
+    setStage(`
+      <div class="type-area" id="ta" style="min-height:60px;">墙板后是一台小小的八音盒，四枚音齿被人掰歪了。<br>点击音齿调整音高，让它和原曲一致。</div>
+      <div class="mbox" id="mbox"></div>
+      <div class="mbox-ctrl">
+        <button class="btn show" id="mb-orig" style="margin-top:14px;">听 原 曲</button>
+        <button class="btn show" id="mb-play" style="margin-top:14px;">转 动 发 条</button>
+      </div>
+      <div class="ans-feedback" id="af"></div>
+    `);
+    const box=$('mbox');
+    cur.forEach((c,i)=>{
+      const d=document.createElement('div'); d.className='mbox-slot';
+      d.innerHTML=`<span>♪</span><span class="pitch">${NAMES[c]}</span>`;
+      d.onclick=()=>{ cur[i]=(cur[i]+1)%NOTES.length;
+        d.querySelector('.pitch').textContent=NAMES[cur[i]];
+        sfx.note(NOTES[cur[i]],.4); };
+      box.appendChild(d);
+    });
+    const playSeq=async seq=>{ for(const n of seq){ sfx.note(NOTES[n],.55); await sleep(560);} };
+    let fails=0;
+    await new Promise(res=>{
+      $('mb-orig').onclick=()=>playSeq(target);
+      $('mb-play').onclick=async ()=>{
+        await playSeq(cur);
+        if(cur.every((c,i)=>c===target[i])){
+          document.querySelectorAll('.mbox-slot').forEach(x=>x.classList.add('good'));
+          sfx.chime(); burstCenter();
+          $('af').textContent="八音盒重新唱了起来。整面墙都松了一口气。";
+          await sleep(2200); res();
+        } else {
+          fails++; STATS.wrong++; shake();
+          $('af').className='ans-feedback bad';
+          $('af').textContent= fails>=3
+            ? "（提示：原曲是「mi → la → sol → re」。）"
+            : "还是不对。墙里传来一声叹息，像是它自己也很着急。";
+        }
+      };
+    });
+    await screenType([
+      "调准的一瞬间，八音盒里弹出一张卷起来的小纸条：",
+      "「曲子是它守的。歌词是他改的。」",
+      "「他改了七遍。第一遍在四年前，最后一遍在昨天。」"
+    ],"收 好",58);
+  })();
+
   await askInput({ question: CONFIG.nights[2].question, answers: CONFIG.nights[2].answers, hint: CONFIG.nights[2].hint });
   await memoryScene(2);
 
@@ -563,6 +674,45 @@ async function stageNight4(){
     sfx.chime();
     await sleep(2000); $('fs').style.opacity=1;
     await sleep(4000);
+
+    /* 隐藏结局：收藏家的日记 */
+    if(eggCount()>=4){
+      await screenType([
+        "等等——你口袋里的四颗小橡子，突然热了起来。",
+        "它们拼在一起，变成了一把很小很小的钥匙。",
+        "墙角，浮现出一个上锁的抽屉。"
+      ],"打 开 抽 屉",60);
+      setStage(`
+        <p class="sub" style="margin-bottom:18px;">隐 藏 结 局 · 收 藏 家 的 日 记</p>
+        ${CONFIG.hiddenDiary.map((d,i)=>`<div class="note-paper" style="margin-bottom:12px;transform:rotate(${(i%2?1:-1)*.7}deg);">${d}</div>`).join("")}
+        <button class="btn" id="cb">合 上 日 记</button>
+      `);
+      sfx.chime(); burstCenter();
+      await waitClick($('cb'));
+    }
+
+    /* 入住报告 */
+    const mins=Math.max(1,Math.round((Date.now()-STATS.start)/60000));
+    const eggs=eggCount();
+    const title = STATS.wrong===0 ? "旅馆都被你看穿了"
+      : STATS.wrong<=3 ? "优秀住客 · 下次免押金"
+      : "迷路也很可爱奖";
+    setStage(`
+      <div class="report">
+        <h2>入 住 报 告</h2>
+        <div class="report-row"><span>住客</span><b>${CONFIG._signedName||CONFIG.herName}</b></div>
+        <div class="report-row"><span>入住时长</span><b>${mins} 分钟</b></div>
+        <div class="report-row"><span>记忆碎片</span><b>4 / 4</b></div>
+        <div class="report-row"><span>答错次数</span><b>${STATS.wrong} 次</b></div>
+        <div class="report-row"><span>小橡子彩蛋</span><b>${eggs} / 4${eggs>=4?" · 已解锁隐藏日记":""}</b></div>
+        <div class="report-row"><span>获得称号</span><b>${title}</b></div>
+        <div class="stamp">永久<br>住客</div>
+      </div>
+      <button class="btn" id="cb">退 房 …… 不 ，入 住</button>
+    `);
+    sfx.chime();
+    await waitClick($('cb'));
+
     clearProgress();
     setStage(`
       <h1 style="font-size:24px;letter-spacing:.3em;">四 周 年 快 乐</h1>
@@ -611,6 +761,8 @@ async function mainMenu(){
       fragments=Math.max(0,save.stage-1);
       if(fragments>0) $('fragments').textContent=`记忆碎片 ${fragments} / 4`;
       CONFIG._signedName=save.name||'';
+      if(Array.isArray(save.eggs)) save.eggs.forEach((v,i)=>STATS.eggs[i]=!!v);
+      if(typeof save.wrong==='number') STATS.wrong=save.wrong;
       begin(save.stage);
     };
   });

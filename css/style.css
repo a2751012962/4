@@ -245,3 +245,44 @@
   background:radial-gradient(circle at 36% 36%, #8c3a2e, #5e2018); border:2px solid #3e150e;
   display:flex; align-items:center; justify-content:center; color:#e8c9a0; font-size:20px;
   box-shadow:0 4px 14px rgba(0,0,0,.7); }
+
+/* ============ 彩蛋 ============ */
+.egg { position:absolute; width:26px; height:30px; cursor:pointer; opacity:.32;
+  transition:opacity .4s, transform .3s; z-index:30; }
+.egg:hover { opacity:.9; transform:scale(1.25) rotate(-8deg); }
+.egg svg { width:100%; height:100%; }
+
+/* ============ 电梯 ============ */
+.lift-panel { background:linear-gradient(175deg,#1b1814,#121009); border:1px solid #3a3424;
+  padding:30px 26px; border-radius:8px; box-shadow:0 0 50px rgba(0,0,0,.85), inset 0 0 30px rgba(0,0,0,.6);
+  display:grid; grid-template-columns:repeat(2,64px); gap:14px; }
+.lift-btn { width:64px; height:64px; border-radius:50%; background:#0e0c08;
+  border:2px solid #5a4d33; color:#cdb27a; font-family:inherit; font-size:20px;
+  cursor:pointer; transition:all .3s; letter-spacing:.05em; }
+.lift-btn:hover { border-color:#cdb27a; box-shadow:0 0 16px rgba(205,178,122,.3); }
+.lift-btn.dead { opacity:.3; pointer-events:none; }
+.lift-btn.ghost { color:#a05a4a; border-color:#6e3a30; }
+.lift-btn.lit { background:#cdb27a; color:#0a0a0f; box-shadow:0 0 28px rgba(205,178,122,.6); }
+
+/* ============ 八音盒 ============ */
+.mbox { display:flex; gap:14px; margin:26px 0 10px; }
+.mbox-slot { width:62px; height:84px; background:#14110c; border:1px solid #3a3424;
+  border-radius:6px; cursor:pointer; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:6px; transition:all .3s;
+  color:#cdb27a; font-size:22px; user-select:none; }
+.mbox-slot:hover { border-color:#cdb27a; }
+.mbox-slot .pitch { font-size:13px; color:#7d7668; letter-spacing:.1em; }
+.mbox-slot.good { border-color:#7a9a5a; box-shadow:0 0 14px rgba(122,154,90,.35); }
+.mbox-ctrl { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+
+/* ============ 入住报告 ============ */
+.report { background:linear-gradient(175deg,#171511,#12100c); border:1px solid #3a3424;
+  padding:40px 38px; max-width:480px; width:100%; position:relative; }
+.report::before { content:""; position:absolute; inset:8px; border:1px solid rgba(205,178,122,.12); pointer-events:none; }
+.report h2 { text-align:center; font-weight:400; letter-spacing:.4em; text-indent:.4em; color:#cdb27a; margin-bottom:26px; font-size:20px; }
+.report-row { display:flex; justify-content:space-between; border-bottom:1px dashed #3a3424;
+  padding:11px 4px; font-size:15px; color:#b5ac99; }
+.report-row b { color:#e0c285; font-weight:400; }
+.report .stamp { position:absolute; right:24px; bottom:20px; width:74px; height:74px; border-radius:50%;
+  border:2.5px solid #8c3a2e; color:#8c3a2e; display:flex; align-items:center; justify-content:center;
+  font-size:15px; letter-spacing:.15em; transform:rotate(-14deg); opacity:.85; }

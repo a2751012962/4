@@ -42,6 +42,24 @@ async function blackoutSay(lines){
 function addFragment(){ fragments++; $('fragments').textContent=`记忆碎片 ${fragments} / 4`; sfx.chime(); }
 function setNight(n){ $('night-badge').textContent = n; }
 
+/* 统计与彩蛋 */
+const STATS = { wrong:0, eggs:[false,false,false,false], start:Date.now() };
+function eggCount(){ return STATS.eggs.filter(Boolean).length; }
+function plantEgg(i, container){
+  if(STATS.eggs[i]) return;
+  const e=document.createElement('div');
+  e.className='egg'; e.title='？';
+  e.innerHTML=`<svg viewBox="0 0 40 46"><ellipse cx="20" cy="26" rx="11" ry="13" fill="#cf9352" stroke="#8a5a28" stroke-width="2"/><path d="M7 19 q13 -15 26 0 q-13 5 -26 0 z" fill="#7a4e26"/><rect x="18.5" y="6" width="3" height="6" rx="1.5" fill="#5b3a1c"/></svg>`;
+  e.style.left=(12+Math.random()*70)+'%';
+  e.style.top=(64+Math.random()*22)+'%';
+  e.onclick=()=>{ STATS.eggs[i]=true; sfx.chime();
+    burst(e.getBoundingClientRect().left+14, e.getBoundingClientRect().top+16, 12);
+    e.remove();
+    whisper(`（你捡到了一颗小橡子……${eggCount()}/4。它好像不属于这家旅馆。）`);
+  };
+  container.appendChild(e);
+}
+
 const norm = s => (s||"").toLowerCase().replace(/[\s。，、．.\-—_·,!！?？:：;；'"“”‘’()（）]/g,"");
 function matches(input, answers){
   const v=norm(input); if(!v) return false;
@@ -75,7 +93,7 @@ async function askInput({question, answers, hint, successLines}){
         $('af').textContent="（咔哒。某个上了四年锁的东西，开了。）";
         setTimeout(res,1600);
       } else {
-        wrong++; shake();
+        wrong++; STATS.wrong++; shake();
         $('af').className='ans-feedback bad';
         $('af').textContent=wrongLines[Math.min(wrong-1,wrongLines.length-1)];
         if(wrong===3){ $('af').textContent+="\n"+hint; $('af').style.whiteSpace='pre-line'; }
@@ -113,7 +131,9 @@ async function collectorNote(i){
     <p class="sub" style="margin-top:18px;font-size:12px;">（右下角……有一个很小的字）</p>
     <button class="btn" id="cb">收 好 纸 条</button>
   `);
-  sfx.thud(); await sleep(600); await waitClick($('cb'));
+  sfx.thud();
+  plantEgg(i, stage.firstElementChild);
+  await sleep(600); await waitClick($('cb'));
 }
 
 /* ============ 同伴HUD ============ */
@@ -141,7 +161,8 @@ function gainCompanion(k){
 const SAVE_KEY='acorn_hotel_save';
 function saveProgress(stage){
   try{ localStorage.setItem(SAVE_KEY, JSON.stringify({
-    stage, fragments, name: CONFIG._signedName||'' })); }catch(e){}
+    stage, fragments, name: CONFIG._signedName||'',
+    eggs: STATS.eggs, wrong: STATS.wrong })); }catch(e){}
 }
 function loadProgress(){
   try{ return JSON.parse(localStorage.getItem(SAVE_KEY)||'null'); }catch(e){ return null; }

@@ -38,9 +38,16 @@ const sfx = (()=> {
       droneOsc.connect(f); f.connect(g); g.connect(ctx.destination); droneOsc.start(); droneOsc._g=g;
     } else if(!start && droneOsc){ droneOsc._g.gain.linearRampToValueAtTime(0,ctx.currentTime+2);
       droneOsc.stop(ctx.currentTime+2.1); droneOsc=null; } };
+  const note=(freq,dur=.5,vol=.12)=>{ if(!on||!ctx)return;
+    const o=ctx.createOscillator(),g=ctx.createGain(); o.type='sine'; o.frequency.value=freq;
+    const o2=ctx.createOscillator(),g2=ctx.createGain(); o2.type='triangle'; o2.frequency.value=freq*2; g2.gain.value=vol*.25;
+    g.gain.setValueAtTime(vol,ctx.currentTime); g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+dur);
+    g2.gain.setValueAtTime(vol*.3,ctx.currentTime); g2.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+dur*.8);
+    o.connect(g); g.connect(ctx.destination); o2.connect(g2); g2.connect(ctx.destination);
+    o.start(); o.stop(ctx.currentTime+dur+.05); o2.start(); o2.stop(ctx.currentTime+dur); };
   return { toggle(){ensure(); on=!on; if(!on){waves(false);drone(false);} return on;},
     enable(){ensure(); if(ctx.state==='suspended')ctx.resume(); on=true;},
-    tick,thud,chime,waves,drone };
+    tick,thud,chime,waves,drone,note };
 })();
 function toggleSound(){ const on=sfx.toggle();
   $('sound-btn').style.color = on?'#cdb27a':'#7d7060';
