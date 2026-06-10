@@ -6,7 +6,7 @@ const ART = (() => {
   // outfit: 'sailor' | 'hiker' | 'onesie'
   function bear(outfit) {
     const fur = '#d9c49a', pad = '#efe3c8', line = '#6e5639', dark = '#3a2d1c';
-    const suit = '#e8b7c0', suitLine = '#b98792', suitPad = '#f6dde2';
+    const suit = '#f4f0e6', suitLine = '#b3a88f', suitPad = '#fdfbf4';
     const onesie = outfit === 'onesie';
     const bodyFill = onesie ? suit : fur, bodyLine = onesie ? suitLine : line;
 
