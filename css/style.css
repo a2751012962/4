@@ -193,3 +193,55 @@
     border:1px solid #3c352644; color:#7d7060; border-radius:50%; width:38px; height:38px; cursor:pointer; font-size:15px; }
   #night-badge { position:fixed; top:14px; left:16px; z-index:70; color:#564e3e; font-size:11px; letter-spacing:.25em; }
   .placeholder { color:#8a6f3f; }
+
+/* ============ 美术升级：角色 ============ */
+.bear-svg { width:100%; height:100%; display:block; }
+.bear-bob { animation:bob 3.2s ease-in-out infinite; transform-origin:center; }
+.bear-eyes { transform-origin:100px 72px; animation:blinkeyes 4.8s infinite; }
+@keyframes blinkeyes { 0%,93%,100%{transform:scaleY(1)} 95.5%{transform:scaleY(.06)} }
+.acorn-wiggle { animation:wiggle 2.8s ease-in-out infinite; transform-origin:center 100px; }
+@keyframes wiggle { 0%,100%{transform:rotate(-3deg)} 50%{transform:rotate(3deg)} }
+.toy-svg { width:clamp(150px,30vw,210px); filter:drop-shadow(0 0 32px rgba(205,178,122,.3)); }
+.toy-svg.small { width:clamp(110px,22vw,150px); }
+
+/* ============ 主菜单 ============ */
+#menu-scene { position:fixed; inset:0; z-index:5; overflow:hidden; }
+#menu-ui { position:relative; z-index:12; height:100vh; display:flex; flex-direction:column;
+  align-items:center; justify-content:flex-end; padding-bottom:9vh; text-align:center; }
+.menu-title { font-size:clamp(34px,7vw,60px); letter-spacing:.3em; text-indent:.3em; color:#e8d9b0;
+  text-shadow:0 0 30px rgba(232,203,143,.45), 0 4px 18px rgba(0,0,0,.9); }
+.menu-sub { color:#9a8f78; letter-spacing:.35em; font-size:13px; margin-top:14px; text-shadow:0 2px 8px #000; }
+.sign-glow { animation:signpulse 3.4s ease-in-out infinite; }
+@keyframes signpulse { 0%,100%{opacity:1} 50%{opacity:.55} }
+.winflick { animation:winflick 5s steps(1) infinite; }
+@keyframes winflick { 0%,86%,100%{opacity:1} 90%{opacity:.25} 93%{opacity:.8} }
+.smoke { animation:smokerise 4s ease-in infinite; }
+@keyframes smokerise { 0%{transform:translateY(0); opacity:.5} 100%{transform:translateY(-46px); opacity:0} }
+.fogmove { animation:fogdrift 11s ease-in-out infinite alternate; }
+@keyframes fogdrift { from{transform:translateX(-36px)} to{transform:translateX(36px)} }
+.raindrop { position:absolute; top:-12vh; width:1.5px; height:13vh; z-index:8;
+  background:linear-gradient(180deg,transparent,#9fb2dd); animation:rainfall linear infinite; }
+@keyframes rainfall { to{transform:translateY(125vh)} }
+.menu-btns { display:flex; gap:16px; flex-wrap:wrap; justify-content:center; }
+.menu-btns .btn { margin-top:28px; background:rgba(10,8,16,.55); backdrop-filter:blur(3px); }
+
+/* ============ 同伴HUD ============ */
+#hud-companions { position:fixed; left:16px; bottom:14px; z-index:70; display:flex; gap:10px; }
+.comp-slot { width:52px; height:52px; border-radius:50%; border:1px solid #3a3424;
+  background:#100d09 center/82% no-repeat; opacity:.28; transition:all .8s; position:relative; }
+.comp-slot.owned { opacity:1; border-color:#cdb27a; box-shadow:0 0 18px rgba(205,178,122,.35); }
+.comp-slot.pop { animation:comppop .9s cubic-bezier(.2,1.6,.4,1); }
+@keyframes comppop { 0%{transform:scale(.2)} 60%{transform:scale(1.25)} 100%{transform:scale(1)} }
+.comp-slot .comp-svg { position:absolute; inset:4px; }
+
+/* ============ 章节卡升级 ============ */
+.chapter-card { display:flex; flex-direction:column; align-items:center; gap:18px; }
+.chapter-card .deco { width:200px; height:1px; background:linear-gradient(90deg,transparent,#cdb27a88,transparent); }
+
+/* ============ 信封开场 ============ */
+.envelope { width:min(380px,80vw); background:#1a1712; border:1px solid #443924;
+  padding:34px 30px; box-shadow:0 16px 60px rgba(0,0,0,.9); transform:rotate(-1deg); position:relative; }
+.envelope .seal { position:absolute; top:-16px; right:26px; width:44px; height:44px; border-radius:50%;
+  background:radial-gradient(circle at 36% 36%, #8c3a2e, #5e2018); border:2px solid #3e150e;
+  display:flex; align-items:center; justify-content:center; color:#e8c9a0; font-size:20px;
+  box-shadow:0 4px 14px rgba(0,0,0,.7); }

@@ -1,17 +1,8 @@
-/* ================= 主流程 ================= */
-async function main(){
+/* ================= 主流程（章节化 + 存档） ================= */
+"use strict";
 
-  /* ---- 标题 ---- */
-  setStage(`
-    <h1>橡子旅馆守则</h1>
-    <p class="sub">—— 四周年 · 互动悬疑 ——</p>
-    <button class="btn show" id="cb">收 信</button>
-    <p class="sub" style="font-size:12px;margin-top:26px;">建议佩戴耳机 · 点击右上角 ♪ 开启音效<br>时长约 20 分钟</p>
-  `);
-  await new Promise(r=>{ $('cb').onclick=()=>{ sfx.enable();
-    $('sound-btn').style.color='#cdb27a'; $('sound-btn').style.borderColor='#cdb27a88'; r(); }; });
-
-  /* ---- 炸裂冷开场 ---- */
+/* ---------- 序章 ---------- */
+async function stageIntro(){
   sfx.drone(true);
   await screenType([
     "四周年纪念日这晚，",
@@ -20,8 +11,15 @@ async function main(){
     "我已经，是第四次入住了。"
   ], "？？？", 75);
 
-  /* ---- 邀请函 ---- */
-  await screenType([
+  /* 邀请函（信封） */
+  setStage(`
+    <div class="envelope">
+      <div class="seal">栎</div>
+      <div class="type-area" id="ta" style="font-size:16px;min-height:200px;text-align:left;"></div>
+    </div>
+    <button class="btn" id="cb">拆 开 守 则</button>
+  `);
+  await typeInto($('ta'),[
     "事情要从这封信说起。",
     "「恭喜您，成为橡子旅馆的第 4 位住客。」",
     "我没有预订过任何旅馆。",
@@ -29,9 +27,10 @@ async function main(){
     "我们在一起的那一天。",
     "寄信人栏写着：",
     "「 你 最 熟 悉 的 陌 生 人 」"
-  ], "拆 开 守 则");
+  ],62);
+  await waitClick($('cb'));
 
-  /* ---- 守则 ---- */
+  /* 守则 */
   await (async ()=>{
     setStage(`
       <div class="paper">
@@ -58,7 +57,7 @@ async function main(){
     await waitClick($('cb'));
   })();
 
-  /* ---- 登记簿签名 ---- */
+  /* 登记簿签名 */
   await (async ()=>{
     setStage(`
       <div class="paper" style="max-width:480px;">
@@ -84,10 +83,12 @@ async function main(){
     });
     await screenType(["前三位住客是谁？","为什么入住日期，刚好是每年的今天？","——你决定，今晚弄清楚这一切。"], "开始 · 第一晚");
   })();
+}
 
-  /* ============ 第一晚 · 海之房 ============ */
+/* ---------- 第一晚 · 海之房 ---------- */
+async function stageNight1(){
   setNight("第一晚 · 海之房");
-  await chapterCard("第 一 晚","海 之 房 · 五扇门的走廊");
+  await chapterCard("第 一 晚","海 之 房 · 五扇门的走廊",0);
 
   /* 五扇门 */
   await (async ()=>{
@@ -123,12 +124,13 @@ async function main(){
           await blackoutSay(["灯，全灭了。","黑暗里，有什么毛茸茸的东西，轻轻牵住了你的手。"]);
           hasBear=true;
           setStage(`
-            <div class="toy">🧸</div>
-            <div class="item-toast">获得同伴道具 · 海员熊「罗盘」</div>
+            <div class="toy-svg">${ART.bear('sailor')}</div>
+            <div class="item-toast">获得同伴 · 海员熊「罗盘」</div>
             <div class="type-area" id="bt" style="margin-top:24px;"></div>
             <button class="btn" id="cb">跟 它 走</button>
           `);
-          sfx.waves(true); sfx.chime();
+          gainCompanion('sailor');
+          sfx.waves(true);
           await typeInto($('bt'),[
             "它穿着海员服，帽徽擦得发亮。",
             "「别怕。我找这座旅馆，找了四年。」",
@@ -140,7 +142,7 @@ async function main(){
             <div class="type-area" id="ta" style="min-height:80px;">海员熊的帽徽轻轻转动，最后停住——<br>指向第三扇门。门上泛起微光。</div>
             <div id="doors-box2"></div>
           `);
-          const b2=$('doors-box2'); b2.className=''; b2.id='doors-box2'; b2.style.cssText="display:flex;gap:clamp(8px,2vw,22px);margin-top:36px;";
+          const b2=$('doors-box2'); b2.style.cssText="display:flex;gap:clamp(8px,2vw,22px);margin-top:36px;";
           for(let k=1;k<=5;k++){
             const dd=document.createElement('div'); dd.className='door'+(k===3?' beacon':' dead');
             dd.textContent=['壹','贰','叁','肆','伍'][k-1];
@@ -160,7 +162,7 @@ async function main(){
     await done;
   })();
 
-  /* 第一晚 · 夜海行船 */
+  /* 夜海行船 */
   await screenType([
     "你推开第三扇门——",
     "门后没有房间。",
@@ -179,7 +181,6 @@ async function main(){
   await askInput({ question: CONFIG.nights[0].question, answers: CONFIG.nights[0].answers, hint: CONFIG.nights[0].hint });
   await memoryScene(0);
 
-  /* 登记簿残页1 */
   await screenType([
     "离开房间时，你在床底发现一页撕下来的登记簿。",
     "「第1位住客 · 三年前入住 · 退房时遗失物品：一段关于『开始』的记忆。」",
@@ -191,10 +192,12 @@ async function main(){
     "它的登山杖，是湿的。",
     "今晚，没有下过雨。"
   ],"第 二 晚 →",65);
+}
 
-  /* ============ 第二晚 · 山之房 ============ */
+/* ---------- 第二晚 · 山之房 ---------- */
+async function stageNight2(){
   setNight("第二晚 · 山之房");
-  await chapterCard("第 二 晚","山 之 房 · 会说谎的灯");
+  await chapterCard("第 二 晚","山 之 房 · 会说谎的灯",1);
 
   await (async ()=>{
     setStage(`
@@ -217,7 +220,7 @@ async function main(){
     const box=$('paths');
     let resolve; const done=new Promise(r=>resolve=r);
     let wrongOnce=false;
-    opts.forEach((o,i)=>{
+    opts.forEach((o)=>{
       const b=document.createElement('button'); b.className='path-btn'; b.textContent=o.t;
       b.onclick=async ()=>{
         if(o.ok){
@@ -229,12 +232,12 @@ async function main(){
             wrongOnce=true; await sleep(2200);
             await blackoutSay(["雾，涌了上来。","一只系着登山扣的爪子，把你往后拉了一把。"]);
             setStage(`
-              <div class="toy">🧸</div>
-              <div class="item-toast">获得同伴道具 · 徒步熊「不说谎的灯」</div>
+              <div class="toy-svg">${ART.bear('hiker')}</div>
+              <div class="item-toast">获得同伴 · 徒步熊「不说谎的灯」</div>
               <div class="type-area" id="bt" style="margin-top:24px;"></div>
               <button class="btn" id="cb">举 起 灯</button>
             `);
-            sfx.chime();
+            gainCompanion('hiker');
             await typeInto($('bt'),[
               "「这座旅馆里，只有我的灯不说谎。」",
               "「我走过外面所有的路，才学会分辨哪句是真的。」",
@@ -256,7 +259,7 @@ async function main(){
     await done;
   })();
 
-  /* 第二晚 · 雾墙追逐 */
+  /* 雾墙追逐 */
   await screenType([
     "雾散开的一瞬间，你听见身后传来低低的轰鸣。",
     "不是风。",
@@ -313,7 +316,8 @@ async function main(){
     "「她今晚回来取过了。」"
   ],"继 续",55);
   await collectorNote(1);
-  /* 红色警报事件 */
+
+  /* 红色警报 */
   await (async ()=>{
     redAlert(true); heartbeat(true,115); shake(); screenTear();
     setStage(`
@@ -332,10 +336,12 @@ async function main(){
     redAlert(false); heartbeat(false);
     await waitClick($('cb'));
   })();
+}
 
-  /* ============ 第三晚 · 夜之房 ============ */
+/* ---------- 第三晚 · 夜之房 ---------- */
+async function stageNight3(){
   setNight("第三晚 · 夜之房");
-  await chapterCard("第 三 晚","夜 之 房 · 熄灯后的真话");
+  await chapterCard("第 三 晚","夜 之 房 · 熄灯后的真话",2);
 
   await (async ()=>{
     await screenType([
@@ -345,11 +351,12 @@ async function main(){
       "「我只在熄灯后说话。守则说，我说的都是真话，除了最后一句。」"
     ],"听 它 说",60);
     setStage(`
-      <div class="toy">🧸</div>
-      <div class="item-toast">同伴道具 · 连体衣熊「翻译低语的耳朵」</div>
+      <div class="toy-svg">${ART.bear('onesie')}</div>
+      <div class="item-toast">获得同伴 · 连体衣熊「翻译低语的耳朵」</div>
       <div class="type-area" id="ta" style="margin-top:20px;min-height:60px;"></div>
       <button class="btn" id="cb">举 起 手 电</button>
     `);
+    gainCompanion('onesie');
     await typeInto($('ta'),[
       "「今晚，旅馆把五句低语藏进了黑暗里。」",
       "「四句是真话。一句是假话。」",
@@ -357,7 +364,7 @@ async function main(){
     ],52);
     await waitClick($('cb'));
     await flashlightGame();
-    /* 找齐后：辨别假话 */
+
     setStage(`
       <div class="type-area" id="ta" style="min-height:60px;"></div>
       <div id="paths"></div>
@@ -402,10 +409,12 @@ async function main(){
     "明天就是第四晚。",
     "保管库，该去看看了。"
   ],"最 终 晚 →",62);
+}
 
-  /* ============ 第四晚 · 保管库 ============ */
+/* ---------- 第四晚 · 保管库 ---------- */
+async function stageNight4(){
   setNight("第四晚 · 保管库");
-  await chapterCard("第 四 晚","记 忆 保 管 库");
+  await chapterCard("第 四 晚","记 忆 保 管 库",3);
 
   await (async ()=>{
     await screenType([
@@ -425,11 +434,12 @@ async function main(){
       "笃笃和突突从你口袋里探出头：「到了。」"
     ],"走到门前",60);
     setStage(`
-      <div class="toy" style="font-size:clamp(46px,9vw,72px);">🌰🌰</div>
-      <div class="item-toast">获得同伴道具 · 笃笃与突突「成对的钥匙」</div>
+      <div class="toy-svg small">${ART.acorns()}</div>
+      <div class="item-toast">获得同伴 · 笃笃与突突「成对的钥匙」</div>
       <div class="type-area" id="ta" style="margin-top:20px;"></div>
       <button class="btn" id="cb">走到门前</button>
     `);
+    gainCompanion('acorns');
     await typeInto($('ta'),[
       "保管库的门是橡木做的，上面刻着一整棵橡树。",
       "树根处有两个小小的锁孔。",
@@ -441,7 +451,7 @@ async function main(){
 
   await askInput({ question: CONFIG.finalQuestion, answers: CONFIG.finalAnswers, hint: CONFIG.finalHint });
 
-  /* ---- 终极反转 ---- */
+  /* 终极反转 */
   await (async ()=>{
     await screenType([
       "门，开了。",
@@ -471,7 +481,7 @@ async function main(){
     ],"那收藏家是谁？",70);
   })();
 
-  /* ---- 终章 beats ---- */
+  /* 终章 */
   await (async ()=>{
     sfx.drone(false);
     const beats=[
@@ -498,7 +508,6 @@ async function main(){
         if(i>=beats.length){ stage.onclick=null; res(); return; }
         busy=true;
         const b=beats[i++];
-        if(fl.children.length>=4 || b.c==='gold') {} // 保留滚动叠加
         const d=document.createElement('div');
         d.className='finale-line '+b.c; d.textContent=b.t;
         if(fl.children.length>=4) fl.innerHTML='';
@@ -545,7 +554,7 @@ async function main(){
       </div>
       <button class="btn" id="cb">收 下</button>
     `);
-    sfx.chime();
+    sfx.chime(); burstCenter();
     await waitClick($('cb'));
 
     /* 转身 */
@@ -554,6 +563,7 @@ async function main(){
     sfx.chime();
     await sleep(2000); $('fs').style.opacity=1;
     await sleep(4000);
+    clearProgress();
     setStage(`
       <h1 style="font-size:24px;letter-spacing:.3em;">四 周 年 快 乐</h1>
       <p class="sub" style="margin-top:26px;">橡子旅馆 · 永不歇业<br>下次入住时间：五周年的今天</p>
@@ -562,4 +572,57 @@ async function main(){
   })();
 }
 
+/* ---------- 主菜单 ---------- */
+const STAGES=[stageIntro, stageNight1, stageNight2, stageNight3, stageNight4];
+const STAGE_NAMES=["序章","第一晚 · 海之房","第二晚 · 山之房","第三晚 · 夜之房","第四晚 · 保管库"];
+const OWNED_BY_STAGE=[[],[],['sailor'],['sailor','hiker'],['sailor','hiker','onesie']];
+
+async function mainMenu(){
+  const save=loadProgress();
+  const scene=document.createElement('div');
+  scene.id='menu-scene';
+  scene.innerHTML=ART.hotelScene();
+  document.body.appendChild(scene);
+  ART.makeRain(scene);
+
+  const ui=document.createElement('div');
+  ui.id='menu-ui';
+  ui.innerHTML=`
+    <div class="menu-title">橡子旅馆守则</div>
+    <p class="menu-sub">四周年 · 互动悬疑</p>
+    <div class="menu-btns">
+      <button class="btn show" id="m-new">${save&&save.stage>0?'重 新 开 始':'收 信 · 入 住'}</button>
+      ${save&&save.stage>0?`<button class="btn show" id="m-cont">继续 · ${STAGE_NAMES[save.stage]}</button>`:''}
+    </div>
+    <p class="menu-sub" style="margin-top:22px;font-size:11px;">建议佩戴耳机 · 右上角 ♪ 开关音效 · 时长约20分钟</p>
+  `;
+  scene.appendChild(ui);
+
+  return new Promise(res=>{
+    const begin=(stageIdx)=>{
+      sfx.enable();
+      $('sound-btn').style.color='#cdb27a'; $('sound-btn').style.borderColor='#cdb27a88';
+      scene.style.transition='opacity 1.6s'; scene.style.opacity=0;
+      setTimeout(()=>{ scene.remove(); res(stageIdx); },1600);
+    };
+    $('m-new').onclick=()=>{ clearProgress(); fragments=0; begin(0); };
+    const c=$('m-cont');
+    if(c) c.onclick=()=>{
+      fragments=Math.max(0,save.stage-1);
+      if(fragments>0) $('fragments').textContent=`记忆碎片 ${fragments} / 4`;
+      CONFIG._signedName=save.name||'';
+      begin(save.stage);
+    };
+  });
+}
+
+/* ---------- 启动 ---------- */
+async function main(){
+  const startAt=await mainMenu();
+  initHud(OWNED_BY_STAGE[startAt]);
+  for(let i=startAt;i<STAGES.length;i++){
+    saveProgress(i);
+    await STAGES[i]();
+  }
+}
 main();

@@ -23,8 +23,15 @@ async function screenType(lines, btnLabel="继 续", speed=62){
   await typeInto($('ta'), lines, speed);
   await waitClick($('cb'));
 }
-async function chapterCard(title, sub){
-  setStage(`<div class="chapter">${glitchHTML(title,true)}</div><p class="sub">${sub}</p><button class="btn" id="cb">进 入</button>`);
+async function chapterCard(title, sub, iconIdx){
+  const icon = (typeof iconIdx==='number') ? ART.chapterIcon(iconIdx) : '';
+  setStage(`<div class="chapter-card">
+    ${icon}
+    <div class="chapter">${glitchHTML(title,true)}</div>
+    <div class="deco"></div>
+    <p class="sub">${sub}</p>
+    <button class="btn" id="cb">进 入</button>
+  </div>`);
   sfx.thud(); screenTear(); await sleep(800); await waitClick($('cb'));
 }
 async function blackoutSay(lines){
@@ -108,3 +115,35 @@ async function collectorNote(i){
   `);
   sfx.thud(); await sleep(600); await waitClick($('cb'));
 }
+
+/* ============ 同伴HUD ============ */
+const COMPANIONS = ['sailor','hiker','onesie','acorns'];
+function initHud(owned=[]){
+  let hud=$('hud-companions');
+  if(!hud){ hud=document.createElement('div'); hud.id='hud-companions'; document.body.appendChild(hud); }
+  hud.innerHTML='';
+  COMPANIONS.forEach(k=>{
+    const s=document.createElement('div');
+    s.className='comp-slot'+(owned.includes(k)?' owned':''); s.id='comp-'+k;
+    s.innerHTML=`<div class="comp-svg">${k==='acorns'?ART.acorns():ART.bear(k)}</div>`;
+    hud.appendChild(s);
+  });
+}
+function gainCompanion(k){
+  const s=$('comp-'+k);
+  if(s && !s.classList.contains('owned')){
+    s.classList.add('owned','pop'); sfx.chime();
+    setTimeout(()=>s.classList.remove('pop'),1000);
+  }
+}
+
+/* ============ 存档 ============ */
+const SAVE_KEY='acorn_hotel_save';
+function saveProgress(stage){
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify({
+    stage, fragments, name: CONFIG._signedName||'' })); }catch(e){}
+}
+function loadProgress(){
+  try{ return JSON.parse(localStorage.getItem(SAVE_KEY)||'null'); }catch(e){ return null; }
+}
+function clearProgress(){ try{ localStorage.removeItem(SAVE_KEY); }catch(e){} }

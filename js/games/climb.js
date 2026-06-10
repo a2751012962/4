@@ -52,9 +52,11 @@ function climbGame(){
         }
       }
       // 主角
-      ctx.font='30px serif'; ctx.textAlign='center';
-      ctx.fillText('🧸', 130, y+12 + (jumping?0:Math.sin(t/5)*1.5));
-      ctx.font='13px serif'; ctx.fillText('🏮',152, y-8);
+      const hb=ART.sprite('hiker');
+      const bobY=(jumping?0:Math.sin(t/5)*1.5);
+      if(hb.complete&&hb.naturalWidth) ctx.drawImage(hb, 102, y-44+bobY, 56, 66);
+      ctx.beginPath(); ctx.arc(160, y-14+bobY, 6, 0, 7);
+      ctx.fillStyle='#ffd98a'; ctx.shadowColor='#ffd98a'; ctx.shadowBlur=16; ctx.fill(); ctx.shadowBlur=0;
       // 雾墙
       const fg=ctx.createLinearGradient(fog-180,0,fog+60,0);
       fg.addColorStop(0,'rgba(140,30,30,.5)'); fg.addColorStop(.7,'rgba(70,20,20,.85)'); fg.addColorStop(1,'transparent');

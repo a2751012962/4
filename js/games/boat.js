@@ -56,7 +56,10 @@ function boatGame(){
       const by=H-58 + Math.sin(t/14)*3;
       ctx.beginPath(); ctx.moveTo(px-34,by); ctx.quadraticCurveTo(px,by+26,px+34,by); ctx.lineTo(px+22,by+14); ctx.lineTo(px-22,by+14); ctx.closePath();
       ctx.fillStyle= inv>0 && t%8<4 ? '#7a5b3a' : '#4a3722'; ctx.fill();
-      ctx.font='26px serif'; ctx.textAlign='center'; ctx.fillText('🧸', px, by-6);
+      ctx.globalAlpha = inv>0 && t%8<4 ? .45 : 1;
+      const bs=ART.sprite('sailor');
+      if(bs.complete&&bs.naturalWidth) ctx.drawImage(bs, px-26, by-64, 52, 61);
+      ctx.globalAlpha=1;
       if(inv>0) inv--;
       // 碰撞
       for(let i=ents.length-1;i>=0;i--){
