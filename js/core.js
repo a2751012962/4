@@ -46,9 +46,20 @@ const sfx = (()=> {
     o.connect(g); g.connect(ctx.destination); o2.connect(g2); g2.connect(ctx.destination);
     o.start(); o.stop(ctx.currentTime+dur+.05); o2.start(); o2.stop(ctx.currentTime+dur); };
   return { toggle(){ensure(); on=!on; if(!on){waves(false);drone(false);} return on;},
-    enable(){ensure(); if(ctx.state==='suspended')ctx.resume(); on=true;},
+    enable(){ try{ ensure(); if(ctx.state==='suspended')ctx.resume(); on=true; }catch(e){ on=false; } },
     tick,thud,chime,waves,drone,note };
 })();
 function toggleSound(){ const on=sfx.toggle();
   $('sound-btn').style.color = on?'#cdb27a':'#7d7060';
   $('sound-btn').style.borderColor = on?'#cdb27a88':'#3c352644'; }
+
+/* ============ 全局错误可视化（排查用） ============ */
+function showErr(msg){
+  let box=document.getElementById('errbox');
+  if(!box){ box=document.createElement('div'); box.id='errbox';
+    box.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:999;background:#5e2018;color:#f0c0b0;font-size:12px;padding:8px 14px;font-family:monospace;max-height:30vh;overflow:auto;';
+    document.body.appendChild(box); }
+  const d=document.createElement('div'); d.textContent='⚠ '+msg; box.appendChild(d);
+}
+addEventListener('error',e=>showErr((e.message||'脚本错误')+' @'+(e.filename||'').split('/').pop()+':'+e.lineno));
+addEventListener('unhandledrejection',e=>showErr('Promise: '+(e.reason&&e.reason.message||e.reason)));

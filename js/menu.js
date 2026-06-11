@@ -27,7 +27,7 @@ async function mainMenu(){
 
   return new Promise(res=>{
     const begin=(stageIdx)=>{
-      sfx.enable();
+      try{ sfx.enable(); }catch(e){}
       $('sound-btn').style.color='#cdb27a'; $('sound-btn').style.borderColor='#cdb27a88';
       scene.style.transition='opacity 1.6s'; scene.style.opacity=0;
       setTimeout(()=>{ scene.remove(); res(stageIdx); },1600);

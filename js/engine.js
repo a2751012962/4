@@ -63,7 +63,7 @@ function plantEgg(i, container){
 const norm = s => (s||"").toLowerCase().replace(/[\s。，、．.\-—_·,!！?？:：;；'"“”‘’()（）]/g,"");
 function matches(input, answers){
   const v=norm(input); if(!v) return false;
-  return answers.some(a=>{ const t=norm(a); return v===t || (t.length>=2 && (v.includes(t)||t.includes(v))); });
+  return answers.some(a=>{ const t=norm(a); return v===t || (t.length>=2 && v.includes(t)); });
 }
 
 /* 输入解谜：答错→旅馆变暗+低语；3次后给提示；5次后可跳过 */
@@ -88,6 +88,7 @@ async function askInput({question, answers, hint, successLines}){
   return new Promise(res=>{
     const submit=()=>{
       const v=$('ai').value;
+      if(!norm(v)){ $('ai').focus(); return; }
       if(matches(v,answers)){
         sfx.chime(); $('af').className='ans-feedback';
         $('af').textContent="（咔哒。某个上了四年锁的东西，开了。）";

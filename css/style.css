@@ -28,9 +28,9 @@
     margin-top:40px; padding:13px 42px; background:transparent; color:#cdb27a;
     border:1px solid #5a4d33; border-radius:2px; font-family:inherit;
     font-size:16px; letter-spacing:.3em; text-indent:.3em; cursor:pointer;
-    transition:all .4s; opacity:0;
+    transition:all .4s; opacity:0; pointer-events:none;
   }
-  .btn.show { opacity:1; }
+  .btn.show { opacity:1; pointer-events:auto; }
   .btn:hover { background:#cdb27a; color:#0a0a0f; box-shadow:0 0 24px rgba(205,178,122,.35); }
 
   .type-area { max-width:640px; font-size:clamp(16px,2.4vw,20px); line-height:2.3; min-height:90px; }
