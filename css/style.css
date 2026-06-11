@@ -286,3 +286,18 @@
 .report .stamp { position:absolute; right:24px; bottom:20px; width:74px; height:74px; border-radius:50%;
   border:2.5px solid #8c3a2e; color:#8c3a2e; display:flex; align-items:center; justify-content:center;
   font-size:15px; letter-spacing:.15em; transform:rotate(-14deg); opacity:.85; }
+
+/* ============ 像素风渲染 ============ */
+canvas.game { image-rendering: pixelated; image-rendering: crisp-edges; }
+.px-wrap { position:relative; }
+.scanlines { position:absolute; inset:0; pointer-events:none; border-radius:4px;
+  background:repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 1px, transparent 1px 3px); }
+.px-wrap::after { content:""; position:absolute; inset:0; pointer-events:none; border-radius:4px;
+  background:radial-gradient(ellipse at center, transparent 58%, rgba(0,0,0,.38) 100%); }
+.jpop { position:fixed; z-index:75; transform:translate(-50%,-50%); pointer-events:none;
+  color:#e8cb8f; font-size:14px; letter-spacing:.18em; text-shadow:0 0 10px rgba(232,203,143,.6), 0 1px 2px #000;
+  animation:jpop 1.4s ease-out forwards; }
+@keyframes jpop { 0%{opacity:0; transform:translate(-50%,-30%) scale(.7)}
+  15%{opacity:1; transform:translate(-50%,-50%) scale(1.15)}
+  30%{transform:translate(-50%,-60%) scale(1)}
+  100%{opacity:0; transform:translate(-50%,-150%)} }

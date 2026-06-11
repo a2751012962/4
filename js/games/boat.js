@@ -5,13 +5,15 @@ function boatGame(){
     setStage(`
       <div class="game-wrap">
         <div class="hud"><span id="bg-score">回忆之光 0 / 4</span><span id="bg-warn"></span></div>
-        <canvas class="game" id="bgc" width="680" height="430"></canvas>
+        <div class="px-wrap"><canvas class="game" id="bgc" width="226" height="143"></canvas><div class="scanlines"></div></div>
         <div class="game-tip">← → 或 拖动屏幕 移动小船 · 接住金色的光 · 避开黑色的暗礁</div>
       </div>
     `);
     sfx.waves(true); heartbeat(true, 70);
     const cv=$('bgc'), ctx=cv.getContext('2d');
-    const W=cv.width, H=cv.height;
+    const W=678, H=429;                       /* 逻辑分辨率 */
+    ctx.imageSmoothingEnabled=false;          /* 像素核心三件套之一 */
+    ctx.scale(cv.width/W, cv.height/H);       /* 226x143 背板，3倍像素放大 */
     const P=new J.PSys(), cam=new J.Cam();
     let px=W/2, vx=0, tilt=0, score=0, t=0, inv=0, over=false, flash=0;
     let keyL=false, keyR=false, targetX=null;
@@ -118,7 +120,7 @@ function boatGame(){
             J.hitstop(80); cam.punch(.07); sfx.chime();
             P.spawn({x:e.x,y:e.y,type:'ring',n:1,speed:0,life:26,r:9,color:'#e8cb8f'});
             P.spawn({x:e.x,y:e.y,n:14,speed:3,life:32,r:2.4,color:'#ffd98a',drag:.94});
-            P.spawn({x:e.x,y:e.y-14,type:'text',n:1,speed:.5,angle:-Math.PI/2,spread:0,life:50,color:'#e8cb8f',text:'+ 回忆之光'});
+            J.pop(cv, e.x/W, Math.max(.08,(e.y-26)/H), '+ 回忆之光');
             if(score>=4){ over=true; finish(); return; }
           } else if(inv<=0){
             ents.splice(i,1); inv=60;

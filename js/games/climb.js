@@ -5,13 +5,15 @@ function climbGame(){
     setStage(`
       <div class="game-wrap">
         <div class="hud"><span id="cg-d">距山顶 100%</span><span id="cg-w" style="color:#c0584a;"></span></div>
-        <canvas class="game" id="cgc" width="680" height="430"></canvas>
+        <div class="px-wrap"><canvas class="game" id="cgc" width="226" height="143"></canvas><div class="scanlines"></div></div>
         <div class="game-tip">空格 / 按住屏幕 跳跃（按得越久跳得越高）· <b style="color:#c0584a;">身后的雾正在追你</b></div>
       </div>
     `);
     heartbeat(true, 95);
     const cv=$('cgc'), ctx=cv.getContext('2d');
-    const W=cv.width, H=cv.height, GY=H-70, PX=130;
+    const W=678, H=429, GY=H-70, PX=130;
+    ctx.imageSmoothingEnabled=false;
+    ctx.scale(cv.width/W, cv.height/H);
     const P=new J.PSys(), cam=new J.Cam();
     let t=0, dist=0, over=false;
     const GOAL=3000, speed=3.4;
@@ -85,8 +87,7 @@ function climbGame(){
         }
         if(act && !flagsHit[i] && dist>=GOAL*m){
           flagsHit[i]=true; sfx.chime(); cam.punch(.05);
-          P.spawn({x:PX,y:y-50,type:'text',n:1,speed:.5,angle:-Math.PI/2,spread:0,life:55,
-            color:'#e8cb8f',text:['翻过一座山','过半了！','山顶就在前面'][i]});
+          J.pop(cv, PX/W, Math.max(.08,(y-70)/H), ['翻过一座山','过半了！','山顶就在前面'][i]);
         }
       });
 

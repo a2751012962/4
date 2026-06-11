@@ -87,5 +87,17 @@ const J = (() => {
   const hitstop = ms => { frozenUntil = performance.now() + ms; };
   const frozen = () => performance.now() < frozenUntil;
 
-  return { ease, lerp, PSys, Cam, hitstop, frozen };
+  /* DOM飘字（像素分辨率下中文画进canvas会糊，浮在上层） */
+  const pop=(cv,xr,yr,text,color)=>{
+    const r=cv.getBoundingClientRect();
+    const d=document.createElement('div');
+    d.className='jpop'; d.textContent=text;
+    d.style.left=(r.left+xr*r.width)+'px';
+    d.style.top=(r.top+yr*r.height)+'px';
+    if(color) d.style.color=color;
+    document.body.appendChild(d);
+    setTimeout(()=>d.remove(),1500);
+  };
+
+  return { ease, lerp, PSys, Cam, hitstop, frozen, pop };
 })();
