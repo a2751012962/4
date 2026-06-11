@@ -53,9 +53,19 @@ function hallGame(){
         if(collapsed<step){ const s=$('seg'+collapsed); if(s){ s.style.opacity=0; } collapsed++; }
       }
     },2200);
+    const wrap=$('hall-wrap');
+    const speedline=()=>{
+      const d=document.createElement('div');
+      d.style.cssText='position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(90deg,transparent 0 30px,rgba(205,178,122,.07) 30px 32px);opacity:.9;transition:opacity .45s;z-index:5;';
+      wrap.appendChild(d);
+      requestAnimationFrame(()=>{ d.style.opacity=0; });
+      setTimeout(()=>d.remove(),500);
+      wrap.style.transition='transform .12s'; wrap.style.transform='scale(1.025)';
+      setTimeout(()=>wrap.style.transform='scale(1)',130);
+    };
     const advance=()=>{
       if(over) return;
-      step++; sfx.thud(); apply();
+      step++; sfx.thud(); speedline(); apply();
       if(step===3) whisper("笃笃：别回头！我们殿后！", true);
       if(step===6) whisper("突突：就快到了！锁孔在发光！", true);
       if(step>=SEG){

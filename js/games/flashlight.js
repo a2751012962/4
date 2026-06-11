@@ -19,16 +19,33 @@ function flashlightGame(){
       d.style.left=x+'%'; d.style.top=ys+'%';
       room.appendChild(d); spots.push({el:d, found:false});
     });
-    let lx=-999, ly=-999;
+    let lx=-999, ly=-999, fl=0;
     function paint(){
-      mask.style.background=`radial-gradient(circle 95px at ${lx}px ${ly}px, transparent 0, rgba(2,2,1,.45) 70px, rgba(2,2,1,.985) 150px)`;
+      const r=95+Math.sin(fl/7)*5+(Math.random()<.02?-22:0);   /* 光晕呼吸+偶尔骤暗 */
+      mask.style.background=`radial-gradient(circle ${r}px at ${lx}px ${ly}px, transparent 0, rgba(2,2,1,.45) ${r*.72}px, rgba(2,2,1,.985) ${r*1.55}px)`;
     }
+    setInterval(()=>{ fl++; paint(); },90);
+    /* 黑暗角落的眼睛：被照到就消失 */
+    const eyes=document.createElement('div');
+    eyes.style.cssText='position:absolute;display:flex;gap:9px;transition:opacity 1s;';
+    eyes.innerHTML='<i style="width:5px;height:7px;border-radius:50%;background:#cdb27a;box-shadow:0 0 8px #cdb27a;"></i><i style="width:5px;height:7px;border-radius:50%;background:#cdb27a;box-shadow:0 0 8px #cdb27a;"></i>';
+    eyes.style.left=(60+Math.random()*30)+'%'; eyes.style.top=(70+Math.random()*20)+'%';
+    room.appendChild(eyes);
+    let eyesGone=false;
     paint();
     function onMove(e){
       const r=room.getBoundingClientRect();
       const cx=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
       const cy=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
       lx=cx; ly=cy; paint();
+      if(!eyesGone){
+        const er=eyes.getBoundingClientRect(), rr=room.getBoundingClientRect();
+        if(Math.hypot(er.left-rr.left+10-cx, er.top-rr.top+4-cy)<110){
+          eyesGone=true; eyes.style.opacity=0;
+          whisper("（那双眼睛……是在看你，还是在守着你？）");
+          setTimeout(()=>eyes.remove(),1100);
+        }
+      }
       spots.forEach(s=>{
         if(s.found) return;
         const sr=s.el.getBoundingClientRect();
