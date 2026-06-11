@@ -10,12 +10,11 @@ function flashlightGame(){
     `);
     heartbeat(true,85); sfx.drone(true);
     const room=$('flash-room'), mask=$('flash-mask');
-    const R=room.getBoundingClientRect();
     let found=0, time=60, overFlag=false;
     const spots=[];
     CONFIG.whispers.forEach((w,i)=>{
       const d=document.createElement('div'); d.className='fw'; d.textContent=w;
-      const x=6+Math.random()*52, ys=8+ (i*17)+Math.random()*6;
+      const x=6+Math.random()*44, ys=8+ (i*17)+Math.random()*6;
       d.style.left=x+'%'; d.style.top=ys+'%';
       room.appendChild(d); spots.push({el:d, found:false});
     });
@@ -24,7 +23,7 @@ function flashlightGame(){
       const r=95+Math.sin(fl/7)*5+(Math.random()<.02?-22:0);   /* 光晕呼吸+偶尔骤暗 */
       mask.style.background=`radial-gradient(circle ${r}px at ${lx}px ${ly}px, transparent 0, rgba(2,2,1,.45) ${r*.72}px, rgba(2,2,1,.985) ${r*1.55}px)`;
     }
-    setInterval(()=>{ fl++; paint(); },90);
+    const breathTimer=setInterval(()=>{ fl++; paint(); },90);
     /* 黑暗角落的眼睛：被照到就消失 */
     const eyes=document.createElement('div');
     eyes.style.cssText='position:absolute;display:flex;gap:9px;transition:opacity 1s;';
@@ -74,7 +73,8 @@ function flashlightGame(){
       }
     },1000);
     function finish(){
-      clearInterval(timer); redAlert(false); heartbeat(false); sfx.drone(false);
+      clearInterval(timer); clearInterval(breathTimer);
+      redAlert(false); heartbeat(false); sfx.drone(false);
       room.style.cursor='default';
       mask.style.background='transparent'; sfx.chime(); burstCenter();
       setTimeout(resolve,1400);

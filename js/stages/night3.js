@@ -85,9 +85,14 @@ async function stageNight3(){
     });
     const playSeq=async seq=>{ for(const n of seq){ sfx.note(NOTES[n],.55); await sleep(560);} };
     let fails=0;
+    const muteHint=()=>{ if(!sfx.isOn()){
+      $('af').className='ans-feedback';
+      $('af').textContent="（一点声音都没有……右上角的 ♪ 可以打开音效。）";
+      return true; } return false; };
     await new Promise(res=>{
-      $('mb-orig').onclick=()=>playSeq(target);
+      $('mb-orig').onclick=()=>{ if(muteHint()) return; playSeq(target); };
       $('mb-play').onclick=async ()=>{
+        muteHint();
         await playSeq(cur);
         if(cur.every((c,i)=>c===target[i])){
           document.querySelectorAll('.mbox-slot').forEach(x=>x.classList.add('good'));

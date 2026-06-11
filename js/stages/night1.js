@@ -29,10 +29,11 @@ async function stageNight1(){
       "3":"灯闪了闪。楼层显示器上跳出一个字：「早」。现在是深夜。",
       "B4":"按钮是锁着的。锁孔的形状——像两颗并排的橡子。"
     };
-    let pressed=0;
+    let pressed=0, lifted=false;
     await new Promise(res=>{
       document.querySelectorAll('.lift-btn').forEach(b=>{
         b.onclick=async ()=>{
+          if(lifted) return;
           const f=b.dataset.f;
           if(f==="5"){
             shake(); screenTear(); b.classList.add('dead');
@@ -44,7 +45,8 @@ async function stageNight1(){
             if(f==="B4") whisper("笃笃：嘿嘿，这把锁，回头我们给你开！", true);
           }
           pressed++;
-          if(pressed>=2){
+          if(pressed>=2 && !lifted){
+            lifted=true;
             await sleep(2600);
             $('ta').innerHTML="——突然，所有按钮同时亮起。<br>电梯自己动了。<br>显示器上的数字不是楼层，是一个倒着走的年份：2026…2025…2024…";
             document.querySelectorAll('.lift-btn').forEach(x=>x.classList.add('lit'));
@@ -70,7 +72,7 @@ async function stageNight1(){
       5:"第五扇门。门牌是空白的。你听见门后传来很轻很轻的、布料摩擦的声音。"
     };
     const box=$('doors-box');
-    let wrong=0, hasBear=false, resolve;
+    let wrong=0, hasBear=false, bearTriggered=false, resolve;
     const done=new Promise(r=>resolve=r);
     for(let i=1;i<=5;i++){
       const d=document.createElement('div'); d.className='door';
@@ -86,7 +88,8 @@ async function stageNight1(){
         $('ta').innerHTML=doorLines[i];
         whisper("（有什么东西在看你……不，在守着你。）");
         if(i===5) whisper("笃笃：别数了别数了！这扇晚点再说！", true);
-        if(wrong>=2 && !hasBear){
+        if(wrong>=2 && !bearTriggered){
+          bearTriggered=true;
           await sleep(2200);
           await blackoutSay(["灯，全灭了。","黑暗里，有什么毛茸茸的东西，轻轻牵住了你的手。"]);
           hasBear=true;

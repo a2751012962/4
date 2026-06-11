@@ -9,13 +9,23 @@ function whisper(text, cute=false){
 }
 async function typeInto(el, lines, speed=62){
   el.classList.add('cursor');
-  for(const line of lines){
-    const p=document.createElement('div'); el.appendChild(p);
-    for(const ch of line){ p.textContent+=ch; sfx.tick();
-      await sleep(/[。？！—]/.test(ch)?speed*4:speed); }
-    await sleep(380);
+  /* 点击任意处：跳过打字动画，文字立即全部显示 */
+  let skip=false;
+  const onTap=()=>{ skip=true; };
+  stage.addEventListener('pointerdown', onTap);
+  try{
+    for(const line of lines){
+      const p=document.createElement('div'); el.appendChild(p);
+      for(const ch of line){
+        p.textContent+=ch;
+        if(!skip){ sfx.tick(); await sleep(/[。？！—]/.test(ch)?speed*4:speed); }
+      }
+      if(!skip) await sleep(380);
+    }
+  } finally {
+    stage.removeEventListener('pointerdown', onTap);
+    el.classList.remove('cursor');
   }
-  el.classList.remove('cursor');
 }
 function waitClick(btn){ return new Promise(res=>{ btn.classList.add('show'); btn.onclick=()=>res(); }); }
 async function screenType(lines, btnLabel="继 续", speed=62){
@@ -75,8 +85,6 @@ async function askInput({question, answers, hint, successLines}){
     <button class="btn show" id="cb" style="margin-top:10px;">确 认</button>
     <button class="btn" id="skip" style="font-size:13px;padding:8px 22px;">让旅馆原谅我（跳过）</button>
   `);
-  await typeInto($('ta'), question.split("\n"), 52);
-  $('ai').focus();
   let wrong=0;
   const wrongLines=[
     "（旅馆的灯，暗了一格。）",
@@ -85,7 +93,8 @@ async function askInput({question, answers, hint, successLines}){
     "（笃笃从墙缝探出头：宿主别慌！再想想嘛！）",
     "（突突小声说：答不出也没关系，它不会怪你的。）"
   ];
-  return new Promise(res=>{
+  /* 先绑定处理器再打字：问题还没打完时，确认/回车也已可用 */
+  const done=new Promise(res=>{
     const submit=()=>{
       const v=$('ai').value;
       if(!norm(v)){ $('ai').focus(); return; }
@@ -106,6 +115,9 @@ async function askInput({question, answers, hint, successLines}){
     $('ai').addEventListener('keydown',e=>{ if(e.key==='Enter') submit(); });
     $('skip').onclick=()=>{ sfx.chime(); res(); };
   });
+  await typeInto($('ta'), question.split("\n"), 52);
+  const ai=$('ai'); if(ai) ai.focus();
+  return done;
 }
 
 async function memoryScene(night){

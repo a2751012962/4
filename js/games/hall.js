@@ -49,7 +49,7 @@ function hallGame(){
         // 追上了：闪红警告，吞掉当前段之前的，但不惩罚——熊们顶住了
         redAlert(true); shake();
         $('hg-w').textContent='它追上来了——快跑！';
-        setTimeout(()=>{ redAlert(false); $('hg-w').textContent=''; },1400);
+        setTimeout(()=>{ redAlert(false); const w=$('hg-w'); if(w) w.textContent=''; },1400);
         if(collapsed<step){ const s=$('seg'+collapsed); if(s){ s.style.opacity=0; } collapsed++; }
       }
     },2200);
