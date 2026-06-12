@@ -9,7 +9,8 @@
 - `js/core.js` — 基础工具 + WebAudio 音效
 - `js/engine.js` — 场景/打字机/问答引擎
 - `js/fx.js` — 特效（故障字、红色警报、心跳、粒子）
-- `js/games/` — 四晚小游戏（行船 / 跑酷 / 手电筒 / 3D走廊）
+- `js/games/` — 小游戏（行船 / 跑酷 / 手电筒 / 3D走廊 / 时光隧道）
+  - 时光隧道：第四晚开门后的照片隧道，创意致敬 [FranzLy/TimeChannel](https://github.com/FranzLy/TimeChannel)；在 `js/config.js` 的 `timeTunnel` 里写你们的瞬间，可选放真实照片到 `photos/`
 - `js/stages/` — 五个章节剧本（intro / night1-4），每章一个文件
 - `js/menu.js` — 主菜单与存档入口
 - `js/app.js` — 启动器
