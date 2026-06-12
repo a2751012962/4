@@ -13,26 +13,37 @@ function memoryChannel(){
     const ov=document.createElement('div'); ov.id='tc-overlay';
     ov.innerHTML=`
       <iframe id="tc-frame" src="timechannel/dist/index.html" title="时光隧道"></iframe>
+      <div id="tc-loading">正 在 打 开 时 光 隧 道 ……</div>
+      <div id="tc-hint"></div>
       <button class="btn" id="tc-back">记 忆 已 全 部 恢 复 · 回 到 旅 馆</button>`;
     document.body.appendChild(ov);
-    const back=$('tc-back');
-    let ready=false, fell=false;
-    const fallback=()=>{
+    requestAnimationFrame(()=>ov.classList.add('on'));     /* 立刻给黑幕+加载文案，不留死屏 */
+    const frame=$('tc-frame'), back=$('tc-back'), hint=$('tc-hint');
+    let ready=false, fell=false, timer=0;
+    const cleanup=()=>{ clearTimeout(timer); removeEventListener('message',onMsg); };
+    const fallback=()=>{                                   /* 通道没开启 → 像素隧道 */
       if(fell||ready) return; fell=true;
-      removeEventListener('message',onMsg); ov.remove();
+      cleanup(); ov.remove();
       tunnelGame().then(resolve);
     };
+    /* 自适应超时：iframe 加载完成后再给 WebGL/照片初始化留足时间（慢设备别误降级） */
+    timer=setTimeout(fallback,15000);
+    frame.addEventListener('load',()=>{
+      if(ready||fell) return;
+      clearTimeout(timer); timer=setTimeout(fallback,20000);
+    });
+    const showHint=text=>{ hint.textContent=text; hint.classList.add('show'); };
     const onMsg=e=>{
-      if(e.data!=='tc:ready') return;
-      ready=true; ov.classList.add('on'); sfx.chime();
-      whisper("（滚轮 / 拖动 在回忆里前进后退，点击照片可以靠近看。）", true);
-      setTimeout(()=>whisper("（右上角 ⊕ My Photos——把这四年所有的照片都放进来吧。）", true),6000);
-      setTimeout(()=>back.classList.add('show'),12000);   /* 想逛多久逛多久 */
+      if(e.data!=='tc:ready'||ready||fell) return;
+      ready=true; clearTimeout(timer);
+      ov.classList.add('ready'); sfx.chime();              /* 隧道淡入，撤掉加载文案 */
+      showHint("滚轮 / 拖动 在回忆里前进后退 · 点击照片可以靠近看");
+      setTimeout(()=>showHint("右上角 ⊕ My Photos —— 把这四年所有的照片都放进来吧"),6000);
+      setTimeout(()=>{ hint.classList.remove('show'); back.classList.add('show'); },12000);
     };
     addEventListener('message',onMsg);
-    setTimeout(fallback,12000);                            /* 通道没开启就走像素隧道 */
     back.onclick=()=>{
-      removeEventListener('message',onMsg);
+      cleanup();
       sfx.chime(); ov.classList.remove('on');
       setTimeout(()=>{ ov.remove(); resolve(); },1300);
     };

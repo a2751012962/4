@@ -1,6 +1,4 @@
-import exifr from 'exifr';
-
-const DEFAULT_DATE_KEYS = ['DateTimeOriginal', 'CreateDate', 'ModifyDate'];
+import { readDateMs, makeThumbBlob } from '../album/decode.js';
 
 self.addEventListener('message', async (event) => {
   const { seq, type, file, maxDim } = event.data;
@@ -29,24 +27,3 @@ self.addEventListener('message', async (event) => {
     });
   }
 });
-
-async function readDateMs(file) {
-  try {
-    const meta = await exifr.parse(file, DEFAULT_DATE_KEYS);
-    const date = meta?.DateTimeOriginal || meta?.CreateDate || meta?.ModifyDate;
-    if (date) return new Date(date).getTime();
-  } catch (_) {}
-  return file.lastModified || Date.now();
-}
-
-async function makeThumbBlob(file, maxDim, quality) {
-  const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, maxDim / Math.max(bitmap.width || 1, bitmap.height || 1));
-  const width = Math.max(1, Math.round(bitmap.width * scale));
-  const height = Math.max(1, Math.round(bitmap.height * scale));
-  const canvas = new OffscreenCanvas(width, height);
-  const ctx = canvas.getContext('2d', { alpha: false });
-  ctx.drawImage(bitmap, 0, 0, width, height);
-  bitmap.close();
-  return canvas.convertToBlob({ type: 'image/jpeg', quality });
-}

@@ -1,42 +1,22 @@
-import exifr from 'exifr';
-
 /* file:// 下浏览器禁止创建 Worker（双击 index.html 直接玩的场景），
-   退回主线程执行同样的解码逻辑。 */
+   退回主线程执行同样的解码逻辑（与 worker 共用 decode.js）。
+   注意：这里必须是静态 import——构建产物会被内联成单文件，file:// 下
+   动态 import 外部 chunk 同样会被 CORS 拦截；代价是 http 场景主包也
+   背上 exifr，属有意取舍。 */
+import { readDateMs, makeThumbBlob } from './decode.js';
+
 const WORKERS_USABLE = location.protocol !== 'file:';
-
-const DATE_KEYS = ['DateTimeOriginal', 'CreateDate', 'ModifyDate'];
-
-async function readDateMsLocal(file) {
-  try {
-    const meta = await exifr.parse(file, DATE_KEYS);
-    const date = meta?.DateTimeOriginal || meta?.CreateDate || meta?.ModifyDate;
-    if (date) return new Date(date).getTime();
-  } catch (_) {}
-  return file.lastModified || Date.now();
-}
-
-async function makeThumbBlobLocal(file, maxDim, quality) {
-  const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, maxDim / Math.max(bitmap.width || 1, bitmap.height || 1));
-  const width = Math.max(1, Math.round(bitmap.width * scale));
-  const height = Math.max(1, Math.round(bitmap.height * scale));
-  const canvas = new OffscreenCanvas(width, height);
-  const ctx = canvas.getContext('2d', { alpha: false });
-  ctx.drawImage(bitmap, 0, 0, width, height);
-  bitmap.close();
-  return canvas.convertToBlob({ type: 'image/jpeg', quality });
-}
 
 async function mainThread(type, { file, maxDim }) {
   if (type === 'prepare') {
     const [dateMs, microBlob] = await Promise.all([
-      readDateMsLocal(file),
-      makeThumbBlobLocal(file, maxDim || 96, 0.66),
+      readDateMs(file),
+      makeThumbBlob(file, maxDim || 96, 0.66),
     ]);
     return { ok: true, dateMs, microBlob };
   }
   if (type === 'texture') {
-    return { ok: true, blob: await makeThumbBlobLocal(file, maxDim || 512, 0.82) };
+    return { ok: true, blob: await makeThumbBlob(file, maxDim || 512, 0.82) };
   }
   throw new Error(`unknown worker task: ${type}`);
 }
