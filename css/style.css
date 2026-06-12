@@ -313,3 +313,11 @@ canvas.game { image-rendering: pixelated; image-rendering: crisp-edges; }
   color:#f2e2bb; font-size:clamp(22px,5vw,32px); letter-spacing:.5em; text-indent:.5em;
   text-shadow:0 0 26px rgba(232,203,143,.85), 0 2px 4px #000;
   opacity:0; transition:opacity .7s; }
+
+/* ============ 恢复所有记忆的通道（完整版 TimeChannel 全屏嵌入） ============ */
+#tc-overlay { position:fixed; inset:0; z-index:200; background:#06040b;
+  opacity:0; transition:opacity 1.3s; }
+#tc-overlay.on { opacity:1; }
+#tc-overlay iframe { width:100%; height:100%; border:0; display:block; }
+#tc-overlay #tc-back { position:absolute; left:50%; bottom:24px; transform:translateX(-50%);
+  z-index:2; margin:0; }

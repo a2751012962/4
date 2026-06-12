@@ -2,6 +2,44 @@
    照片环绕成一条向深处蜿蜒的3D隧道：入口是相遇，深处是现在。
    分环排布 + 正弦蜿蜒 + 镜头侧倾 + 年份路标，按住屏幕/空格加速穿行。 */
 "use strict";
+
+/* ---------- 恢复所有记忆的通道：全屏进入完整版 TimeChannel ----------
+   timechannel/ 是完整复制的 FranzLy/TimeChannel（Three.js 无限照片隧道），
+   构建产物已内联成单文件，file:// 双击打开也能跑。
+   右上角「⊕ My Photos」可导入这四年全部照片，一张都不用少。
+   WebGL 起不来 / 加载失败时，退回下面的像素版 tunnelGame()。 */
+function memoryChannel(){
+  return new Promise(resolve=>{
+    const ov=document.createElement('div'); ov.id='tc-overlay';
+    ov.innerHTML=`
+      <iframe id="tc-frame" src="timechannel/dist/index.html" title="时光隧道"></iframe>
+      <button class="btn" id="tc-back">记 忆 已 全 部 恢 复 · 回 到 旅 馆</button>`;
+    document.body.appendChild(ov);
+    const back=$('tc-back');
+    let ready=false, fell=false;
+    const fallback=()=>{
+      if(fell||ready) return; fell=true;
+      removeEventListener('message',onMsg); ov.remove();
+      tunnelGame().then(resolve);
+    };
+    const onMsg=e=>{
+      if(e.data!=='tc:ready') return;
+      ready=true; ov.classList.add('on'); sfx.chime();
+      whisper("（滚轮 / 拖动 在回忆里前进后退，点击照片可以靠近看。）", true);
+      setTimeout(()=>whisper("（右上角 ⊕ My Photos——把这四年所有的照片都放进来吧。）", true),6000);
+      setTimeout(()=>back.classList.add('show'),12000);   /* 想逛多久逛多久 */
+    };
+    addEventListener('message',onMsg);
+    setTimeout(fallback,12000);                            /* 通道没开启就走像素隧道 */
+    back.onclick=()=>{
+      removeEventListener('message',onMsg);
+      sfx.chime(); ov.classList.remove('on');
+      setTimeout(()=>{ ov.remove(); resolve(); },1300);
+    };
+  });
+}
+
+/* ================= 像素版时光隧道（无 WebGL 时的兜底） ================= */
 function tunnelGame(){
   return new Promise(resolve=>{
     const cfg = CONFIG.timeTunnel || { years:[], photos:[], totalDays:1460 };
