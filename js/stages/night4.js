@@ -37,7 +37,15 @@ async function stageNight4(){
     await waitClick($('cb'));
   })();
 
+  /* 第四张收藏家纸条（角落的「多」字 + 第4颗小橡子） */
+  await screenType([
+    "门前的地毯下，压着最后一张纸条。",
+    "墨迹未干。像是它知道，你会在今晚到达。"
+  ],"捡 起 纸 条",55);
+  await collectorNote(3);
+
   await askInput({ question: CONFIG.finalQuestion, answers: CONFIG.finalAnswers, hint: CONFIG.finalHint });
+  addFragment();
 
   /* 终极反转 */
   await (async ()=>{
@@ -179,7 +187,7 @@ async function stageNight4(){
         <h2>入 住 报 告</h2>
         <div class="report-row"><span>住客</span><b>${CONFIG._signedName||CONFIG.herName}</b></div>
         <div class="report-row"><span>入住时长</span><b>${mins} 分钟</b></div>
-        <div class="report-row"><span>记忆碎片</span><b>4 / 4</b></div>
+        <div class="report-row"><span>记忆碎片</span><b>${fragments} / 4</b></div>
         <div class="report-row"><span>答错次数</span><b>${STATS.wrong} 次</b></div>
         <div class="report-row"><span>小橡子彩蛋</span><b>${eggs} / 4${eggs>=4?" · 已解锁隐藏日记":""}</b></div>
         <div class="report-row"><span>获得称号</span><b>${title}</b></div>

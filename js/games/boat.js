@@ -128,7 +128,7 @@ function boatGame(){
             P.spawn({x:e.x,y:e.y,type:'shard',n:9,speed:3.4,life:36,r:5,color:'#26304a',g:.18});
             P.spawn({x:px,y:by+8,n:10,speed:2.6,life:30,r:2.6,color:'rgba(159,178,221,.9)',g:.12});
             $('bg-warn').textContent='暗礁！';
-            setTimeout(()=>$('bg-warn').textContent='',1200);
+            setTimeout(()=>{ const w=$('bg-warn'); if(w) w.textContent=''; },1200);
           }
         }
       }

@@ -100,7 +100,7 @@ function climbGame(){
           J.hitstop(60); cam.hit(.5); screenTear(); rot=.9; fog+=90;
           P.spawn({x:PX,y:y,type:'shard',n:8,speed:3,life:34,r:4.5,color:'#241d12',g:.2});
           $('cg-w').textContent='雾，扑近了！';
-          setTimeout(()=>$('cg-w').textContent='',1300);
+          setTimeout(()=>{ const w=$('cg-w'); if(w) w.textContent=''; },1300);
         }
       }
       for(const r of rocks){

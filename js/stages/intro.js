@@ -47,9 +47,9 @@ async function stageIntro(){
     const rules=document.querySelectorAll('.rule');
     for(const r of rules){ r.classList.add('show'); sfx.tick(); await sleep(900); }
     await sleep(800);
-    const t=$('r5'); t.parentElement.parentElement.classList.add('glitching'); shake();
+    const t=$('r5'); t.parentElement.classList.add('glitching'); shake();
     t.textContent="除了最后一句。";
-    await sleep(1100); t.parentElement.parentElement.classList.remove('glitching');
+    await sleep(1100); t.parentElement.classList.remove('glitching');
     whisper("（守则……刚才自己改了字？）");
     await sleep(1200);
     await waitClick($('cb'));

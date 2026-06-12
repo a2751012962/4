@@ -8,6 +8,7 @@ async function mainMenu(){
   const save=loadProgress();
   const scene=document.createElement('div');
   scene.id='menu-scene';
+  scene.style.zIndex='15';   /* 内联兜底：必须压过 #stage(z10)，否则空舞台层挡住菜单按钮（防旧缓存CSS） */
   scene.innerHTML=ART.hotelScene();
   document.body.appendChild(scene);
   ART.makeRain(scene);
@@ -27,8 +28,10 @@ async function mainMenu(){
 
   return new Promise(res=>{
     const begin=(stageIdx)=>{
-      try{ sfx.enable(); }catch(e){}
-      $('sound-btn').style.color='#cdb27a'; $('sound-btn').style.borderColor='#cdb27a88';
+      let soundOn=false;
+      try{ soundOn=sfx.enable(); }catch(e){}
+      STATS.start=Date.now();
+      if(soundOn){ $('sound-btn').style.color='#cdb27a'; $('sound-btn').style.borderColor='#cdb27a88'; }
       scene.style.transition='opacity 1.6s'; scene.style.opacity=0;
       setTimeout(()=>{ scene.remove(); res(stageIdx); },1600);
     };

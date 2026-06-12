@@ -34,7 +34,9 @@ async function stageNight2(){
           shake(); b.classList.add('lie'); $('ta').innerHTML=o.r;
           whisper("突突：这盏灯鼻子都说长了！", true);
           if(!wrongOnce){
-            wrongOnce=true; await sleep(2200);
+            wrongOnce=true;
+            [...box.children].forEach(x=>x.style.pointerEvents='none');
+            await sleep(2200);
             await blackoutSay(["雾，涌了上来。","一只系着登山扣的爪子，把你往后拉了一把。"]);
             setStage(`
               <div class="toy-svg">${ART.bear('hiker')}</div>

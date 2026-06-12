@@ -102,7 +102,7 @@
   }
   .note-paper .sig { text-align:right; color:#8a7d63; margin-top:14px; }
 
-  .fragment-bar { position:fixed; bottom:14px; right:18px; z-index:70; color:#6e6450; font-size:12px; letter-spacing:.25em; }
+  .fragment-bar { position:fixed; bottom:14px; right:18px; z-index:70; color:#6e6450; font-size:12px; letter-spacing:.25em; pointer-events:none; }
 
   .whisper { position:fixed; z-index:40; color:#574e3f; font-size:13px; letter-spacing:.3em; pointer-events:none; animation:whisp 4s forwards; }
   .acorn-say { color:#9c8a5a; font-size:13px; letter-spacing:.1em; }
@@ -191,7 +191,7 @@
 
   #sound-btn { position:fixed; top:10px; right:14px; z-index:70; background:none;
     border:1px solid #3c352644; color:#7d7060; border-radius:50%; width:38px; height:38px; cursor:pointer; font-size:15px; }
-  #night-badge { position:fixed; top:14px; left:16px; z-index:70; color:#564e3e; font-size:11px; letter-spacing:.25em; }
+  #night-badge { position:fixed; top:14px; left:16px; z-index:70; color:#564e3e; font-size:11px; letter-spacing:.25em; pointer-events:none; }
   .placeholder { color:#8a6f3f; }
 
 /* ============ 美术升级：角色 ============ */
@@ -205,9 +205,10 @@
 .toy-svg.small { width:clamp(110px,22vw,150px); }
 
 /* ============ 主菜单 ============ */
-#menu-scene { position:fixed; inset:0; z-index:5; overflow:hidden; }
-#menu-ui { position:relative; z-index:12; height:100vh; display:flex; flex-direction:column;
-  align-items:center; justify-content:flex-end; padding-bottom:9vh; text-align:center; }
+#menu-scene { position:fixed; inset:0; z-index:15; overflow:hidden; } /* 必须高于 #stage(z10)，否则空舞台层会挡住菜单按钮 */
+#menu-ui { position:relative; z-index:12; height:100vh; height:100dvh; display:flex; flex-direction:column;
+  align-items:center; justify-content:flex-end; text-align:center;
+  padding-bottom:calc(9vh + env(safe-area-inset-bottom, 0px)); }
 .menu-title { font-size:clamp(34px,7vw,60px); letter-spacing:.3em; text-indent:.3em; color:#e8d9b0;
   text-shadow:0 0 30px rgba(232,203,143,.45), 0 4px 18px rgba(0,0,0,.9); }
 .menu-sub { color:#9a8f78; letter-spacing:.35em; font-size:13px; margin-top:14px; text-shadow:0 2px 8px #000; }
@@ -226,7 +227,7 @@
 .menu-btns .btn { margin-top:28px; background:rgba(10,8,16,.55); backdrop-filter:blur(3px); }
 
 /* ============ 同伴HUD ============ */
-#hud-companions { position:fixed; left:16px; bottom:14px; z-index:70; display:flex; gap:10px; }
+#hud-companions { position:fixed; left:16px; bottom:14px; z-index:70; display:flex; gap:10px; pointer-events:none; }
 .comp-slot { width:52px; height:52px; border-radius:50%; border:1px solid #3a3424;
   background:#100d09 center/82% no-repeat; opacity:.28; transition:all .8s; position:relative; }
 .comp-slot.owned { opacity:1; border-color:#cdb27a; box-shadow:0 0 18px rgba(205,178,122,.35); }
