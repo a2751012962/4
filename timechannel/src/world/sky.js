@@ -62,7 +62,9 @@ const nebulaMat = new THREE.ShaderMaterial({
       vec3 col = mix(deep, colB, smoothstep(0.25, 0.75, n1));
       col = mix(col, colC, smoothstep(0.5, 0.95, n2) * 0.7);
       col += colD * pow(max(n2 - 0.62, 0.0), 2.0) * 2.2;
-      gl_FragColor = vec4(col * 0.5, 1.0);
+      // 抬升整体下限，尽头中心不再是纯黑（去掉残余“黑洞”观感）
+      vec3 outc = col * 0.5 + vec3(0.018, 0.012, 0.028);
+      gl_FragColor = vec4(outc, 1.0);
     }
   `,
 });
@@ -79,11 +81,27 @@ const endGlowTex = spriteCanvas((ctx) => {
   g.addColorStop(1, 'rgba(220,160,170,0)');
   ctx.fillStyle = g; ctx.fillRect(0, 0, 64, 64);
 });
-const endGlow = new THREE.Sprite(new THREE.SpriteMaterial({
-  map: endGlowTex, transparent: true, opacity: 0.95,
-  blending: THREE.AdditiveBlending, depthWrite: false,
+// 大而柔的外晕（更宽羽化，营造光井氛围）
+const endHaloTex = spriteCanvas((ctx) => {
+  const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+  g.addColorStop(0, 'rgba(255,225,195,0.55)');
+  g.addColorStop(0.45, 'rgba(240,180,180,0.18)');
+  g.addColorStop(1, 'rgba(200,150,170,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, 64, 64);
+});
+// 外晕：更大更柔，fog:false 才不会被雾吞掉
+const endHalo = new THREE.Sprite(new THREE.SpriteMaterial({
+  map: endHaloTex, transparent: true, opacity: 0.6,
+  blending: THREE.AdditiveBlending, depthWrite: false, fog: false,
 }));
-endGlow.scale.set(46, 46, 1);
+endHalo.scale.set(86, 86, 1);
+scene.add(endHalo);
+// 核心亮斑：fog:false 是核心修复点——150 单位外不再被雾吞成黑洞
+const endGlow = new THREE.Sprite(new THREE.SpriteMaterial({
+  map: endGlowTex, transparent: true, opacity: 1.0,
+  blending: THREE.AdditiveBlending, depthWrite: false, fog: false,
+}));
+endGlow.scale.set(52, 52, 1);
 scene.add(endGlow);
 
 /* ---------- 配色：色系选择 + 彩虹 ---------- */
@@ -122,4 +140,8 @@ export function update(dt, t) {
   nebulaMat.uniforms.uColC.value.lerp(skyTarget[1], Math.min(dt * 2, 1));
   nebulaMat.uniforms.uColD.value.lerp(skyTarget[2], Math.min(dt * 2, 1));
   endGlow.position.set(curveX(cz - 150), curveY(cz - 150), cz - 150);
+  endHalo.position.copy(endGlow.position);
+  // 轻微呼吸，强化“活的光”而非死黑
+  endGlow.material.opacity = 0.9 + Math.sin(t * 0.6) * 0.08;
+  endHalo.material.opacity = 0.55 + Math.sin(t * 0.6) * 0.06;
 }

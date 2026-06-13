@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import { CFG, TUNNEL_LEN, curveX, curveY } from '../config.js';
 import { scene, camera } from '../core/stage.js';
-import { makeTexture } from '../core/assets.js';
+import { makeTexture, cardHaloTex } from '../core/assets.js';
 import { photoItems, nextPhotoIndex } from '../album/album.js';
 import { bind as bindTexture } from '../album/texture-pool.js';
 
@@ -15,6 +15,14 @@ const photoGeo = new THREE.PlaneGeometry(CFG.photoW, CFG.photoH);
 const frameGeo = new THREE.PlaneGeometry(CFG.photoW + 0.34, CFG.photoH + 0.34);
 export const frameMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(1.18, 1.0, 0.82) });
 export const frameHoverMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(1.5, 1.28, 1.0) });
+
+// 卡片柔光晕：全部卡片共用一份 geometry + material（避免 400+ 实例）
+const haloGeo = new THREE.PlaneGeometry(CFG.photoW + 2.6, CFG.photoH + 2.6);
+export const cardHaloMat = new THREE.MeshBasicMaterial({
+  map: cardHaloTex, transparent: true, opacity: 0.5,
+  blending: THREE.AdditiveBlending, depthWrite: false,
+  color: new THREE.Color(1.0, 0.9, 0.75),
+});
 
 export const rings = [];       // { group, rotSpeed, sign, cards, year, date }
 export const photoMeshes = []; // 供 raycast
@@ -64,6 +72,9 @@ export function buildTunnel() {
       const mesh = new THREE.Mesh(photoGeo, new THREE.MeshBasicMaterial());
       const frame = new THREE.Mesh(frameGeo, frameMat);
       frame.position.z = -0.03;
+      const halo = new THREE.Mesh(haloGeo, cardHaloMat); // 共享材质，不进 photoMeshes（不影响 raycast）
+      halo.position.z = -0.08; // 在画框之后，不遮挡照片
+      card.add(halo);
       card.add(frame);
       card.add(mesh);
       card.userData = {
