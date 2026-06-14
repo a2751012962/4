@@ -14,10 +14,10 @@ const godRaysShader = {
     tDiffuse: { value: null },
     uLightUV: { value: new THREE.Vector2(0.5, 0.5) },
     uIntensity: { value: 0 },
-    uDensity: { value: 0.9 },
-    uWeight: { value: 0.6 },
-    uDecay: { value: 0.96 },
-    uThreshold: { value: 0.35 },
+    uDensity: { value: 0.82 },
+    uWeight: { value: 0.4 },
+    uDecay: { value: 0.93 },
+    uThreshold: { value: 0.62 },
   },
   vertexShader: /* glsl */`
     varying vec2 vUv;
@@ -64,6 +64,6 @@ export function updateGodRays(camera, worldPos, speedNorm, dt) {
     _ndc.z < 1 && ux > -0.25 && ux < 1.25 && uy > -0.25 && uy < 1.25;
   const u = godRaysPass.uniforms;
   if (onScreen) u.uLightUV.value.set(ux, uy);
-  const target = onScreen ? 0.45 + 0.9 * speedNorm : 0;
+  const target = onScreen ? 0.26 + 0.5 * speedNorm : 0;
   u.uIntensity.value += (target - u.uIntensity.value) * Math.min(dt * 4, 1);
 }

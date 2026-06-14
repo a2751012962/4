@@ -54,7 +54,7 @@ function animate() {
   // 出口光束：光源投影到屏幕，强度随速度（越快洒得越强）
   const speedNorm = Math.min(Math.abs(controls.controls.velocity) / CFG.maxSpeed, 1);
   updateGodRays(camera, sky.getEndLightPos(), speedNorm, dt);
-  renderer.toneMappingExposure += (1.05 + speedNorm * 0.3 - renderer.toneMappingExposure) * Math.min(dt * 3, 1);
+  renderer.toneMappingExposure += (1.05 + speedNorm * 0.18 - renderer.toneMappingExposure) * Math.min(dt * 3, 1);
   render(t);
 }
 
