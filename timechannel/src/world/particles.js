@@ -64,7 +64,7 @@ function driftSpark(pts, dt, t) {
   const inner = CFG.radius - 2, band = 4.5;
   for (let i = 0; i < arr.length; i += 3) {
     arr[i] += Math.sin(t * 0.8 + i) * 0.22 * dt;
-    arr[i + 1] += Math.cos(t * 0.7 + i * 1.3) * 0.22 * dt + dt * 0.12;
+    arr[i + 1] += Math.cos(t * 0.7 + i * 1.3) * 0.22 * dt; // 有界振荡，不做累积上漂（否则会缓慢爬出环带）
     let wrapped = false;
     if (arr[i + 2] > cz + 6) { arr[i + 2] -= TUNNEL_LEN; wrapped = true; }
     if (arr[i + 2] < cz - TUNNEL_LEN + 6) { arr[i + 2] += TUNNEL_LEN; wrapped = true; }

@@ -60,10 +60,11 @@ export function updateGodRays(camera, worldPos, speedNorm, dt) {
   _ndc.copy(worldPos).project(camera);
   const ux = _ndc.x * 0.5 + 0.5;
   const uy = _ndc.y * 0.5 + 0.5;
-  const onScreen =
-    _ndc.z < 1 && ux > -0.25 && ux < 1.25 && uy > -0.25 && uy < 1.25;
+  const inFront = _ndc.z < 1; // 点在相机前方时投影方向有效
+  const onScreen = inFront && ux > -0.25 && ux < 1.25 && uy > -0.25 && uy < 1.25;
   const u = godRaysPass.uniforms;
-  if (onScreen) u.uLightUV.value.set(ux, uy);
+  // 只要在前方就更新 UV：离屏淡出期间光束仍朝真实方向收束，不锚在过期边缘点
+  if (inFront) u.uLightUV.value.set(ux, uy);
   const target = onScreen ? 0.26 + 0.5 * speedNorm : 0;
   u.uIntensity.value += (target - u.uIntensity.value) * Math.min(dt * 4, 1);
 }

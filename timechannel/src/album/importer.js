@@ -12,7 +12,8 @@ import { showToast } from '../ui/toast.js';
 function loadScript(src) {
   return new Promise((resolve, reject) => {
     const s = document.createElement('script');
-    s.src = src; s.onload = resolve; s.onerror = reject;
+    s.src = src; s.onload = resolve;
+    s.onerror = (e) => { s.remove(); reject(e); }; // 加载失败不残留死 script 节点
     document.head.appendChild(s);
   });
 }

@@ -31,9 +31,12 @@ function memoryChannel(){
     frame.addEventListener('load',()=>{
       if(ready||fell) return;
       clearTimeout(timer); timer=setTimeout(fallback,20000);
+      /* 返回入口与 tc:ready 解耦：即便就绪消息丢失也保证玩家能离开，不被困在终章 */
+      setTimeout(()=>{ if(!fell) back.classList.add('show'); },9000);
     });
     const showHint=text=>{ hint.textContent=text; hint.classList.add('show'); };
     const onMsg=e=>{
+      if(e.source&&e.source!==frame.contentWindow) return;
       if(e.data!=='tc:ready'||ready||fell) return;
       ready=true; clearTimeout(timer);
       ov.classList.add('ready'); sfx.chime();              /* 隧道淡入，撤掉加载文案 */
@@ -43,6 +46,7 @@ function memoryChannel(){
     };
     addEventListener('message',onMsg);
     back.onclick=()=>{
+      if(fell) return; back.onclick=null;
       cleanup();
       sfx.chime(); ov.classList.remove('on');
       setTimeout(()=>{ ov.remove(); resolve(); },1300);

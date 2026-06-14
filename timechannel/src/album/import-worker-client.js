@@ -24,19 +24,29 @@ async function mainThread(type, { file, maxDim }) {
 const WORKER_COUNT = Math.max(1, Math.min(4, (navigator.hardwareConcurrency || 4) - 1));
 
 let seq = 0;
+let workerFails = 0;
+let workersDead = false; // worker 反复加载失败（404/MIME）后永久退回主线程，避免无限重生
 const workers = [];
 const idle = [];
 const queue = [];
 const inflight = new Map();
 
 function ensureWorkers() {
-  if (workers.length || !WORKERS_USABLE) return;
+  if (workersDead || workers.length || !WORKERS_USABLE) return;
   for (let i = 0; i < WORKER_COUNT; i++) {
     const worker = new Worker(new URL('../workers/import.worker.js', import.meta.url), { type: 'module' });
     worker.onmessage = (event) => finish(worker, event.data);
     worker.onerror = (event) => failWorker(worker, event.message || 'worker error');
     workers.push(worker);
     idle.push(worker);
+  }
+}
+
+// worker 全部判废：把排队作业平滑排空到主线程解码
+function drainToMain() {
+  while (queue.length) {
+    const job = queue.shift();
+    mainThread(job.message.type, job.message).then(job.resolve, job.reject);
   }
 }
 
@@ -51,10 +61,12 @@ function finish(worker, data) {
 }
 
 function failWorker(worker, message) {
+  // 把该 worker 的在飞作业改回队列重试（而非直接 reject），失败次数累计
   for (const [id, job] of inflight) {
     if (job.worker === worker) {
       inflight.delete(id);
-      job.reject(new Error(message));
+      job.worker = null;
+      queue.push(job);
     }
   }
   const idx = workers.indexOf(worker);
@@ -62,6 +74,12 @@ function failWorker(worker, message) {
   const idleIdx = idle.indexOf(worker);
   if (idleIdx >= 0) idle.splice(idleIdx, 1);
   try { worker.terminate(); } catch (_) {}
+  if (++workerFails >= WORKER_COUNT * 2) { // 持久故障：永久退回主线程
+    workersDead = true;
+    console.warn('import workers unavailable, falling back to main thread:', message);
+    drainToMain();
+    return;
+  }
   ensureWorkers();
   pump();
 }
@@ -78,7 +96,7 @@ function pump() {
 }
 
 function request(type, payload) {
-  if (!WORKERS_USABLE) return mainThread(type, payload);
+  if (!WORKERS_USABLE || workersDead) return mainThread(type, payload);
   ensureWorkers();
   return new Promise((resolve, reject) => {
     const id = ++seq;

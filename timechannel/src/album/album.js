@@ -11,7 +11,7 @@ import { loadUserAlbum, saveUserAlbum } from './store.js';
 export let photoItems = [];
 
 let cursor = 0;
-export function nextPhotoIndex() { return (cursor++) % photoItems.length; }
+export function nextPhotoIndex() { return photoItems.length ? (cursor++) % photoItems.length : 0; }
 
 function setUserAlbum(items, persist = false) {
   userAlbum = items;
