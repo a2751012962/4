@@ -4,9 +4,10 @@
 ============================================================ */
 import * as THREE from 'three';
 import './style.css';
-import { VERSION } from './config.js';
+import { VERSION, CFG } from './config.js';
 import { events } from './events.js';
-import { camera, render } from './core/stage.js';
+import { camera, render, renderer } from './core/stage.js';
+import { updateGodRays } from './core/godrays.js';
 import { loadDefaultPhotos, attachDemoDates, loadPersistedAlbum } from './album/album.js';
 import * as tunnel from './world/tunnel.js';
 import * as sky from './world/sky.js';
@@ -50,6 +51,10 @@ function animate() {
   particles.update(dt, t);                                       // 光尘/星空
   meteors.update(dt, t);                                         // 流星
   timeline.update();                                             // HUD + 滑块
+  // 出口光束：光源投影到屏幕，强度随速度（越快洒得越强）
+  const speedNorm = Math.min(Math.abs(controls.controls.velocity) / CFG.maxSpeed, 1);
+  updateGodRays(camera, sky.getEndLightPos(), speedNorm, dt);
+  renderer.toneMappingExposure += (1.05 + speedNorm * 0.3 - renderer.toneMappingExposure) * Math.min(dt * 3, 1);
   render(t);
 }
 

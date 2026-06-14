@@ -91,18 +91,23 @@ const endHaloTex = spriteCanvas((ctx) => {
 });
 // 外晕：更大更柔，fog:false 才不会被雾吞掉
 const endHalo = new THREE.Sprite(new THREE.SpriteMaterial({
-  map: endHaloTex, transparent: true, opacity: 0.6,
+  map: endHaloTex, transparent: true, opacity: 0.66,
   blending: THREE.AdditiveBlending, depthWrite: false, fog: false,
 }));
-endHalo.scale.set(86, 86, 1);
+endHalo.scale.set(96, 96, 1);
 scene.add(endHalo);
-// 核心亮斑：fog:false 是核心修复点——150 单位外不再被雾吞成黑洞
+// 核心亮斑：fog:false 是核心修复点——150 单位外不再被雾吞成黑洞；
+// 略提暖白亮度，作为光束放射的源头（真正的“光束”由 godrays ShaderPass 完成）
 const endGlow = new THREE.Sprite(new THREE.SpriteMaterial({
   map: endGlowTex, transparent: true, opacity: 1.0,
+  color: new THREE.Color(1.25, 1.12, 0.95),
   blending: THREE.AdditiveBlending, depthWrite: false, fog: false,
 }));
-endGlow.scale.set(52, 52, 1);
+endGlow.scale.set(58, 58, 1);
 scene.add(endGlow);
+
+// 供主循环把光源投影到屏幕、驱动 god-ray 光束
+export function getEndLightPos() { return endGlow.position; }
 
 /* ---------- 配色：色系选择 + 彩虹 ---------- */
 const SKY_PALETTES = {
@@ -142,6 +147,6 @@ export function update(dt, t) {
   endGlow.position.set(curveX(cz - 150), curveY(cz - 150), cz - 150);
   endHalo.position.copy(endGlow.position);
   // 轻微呼吸，强化“活的光”而非死黑
-  endGlow.material.opacity = 0.9 + Math.sin(t * 0.6) * 0.08;
-  endHalo.material.opacity = 0.55 + Math.sin(t * 0.6) * 0.06;
+  endGlow.material.opacity = 0.92 + Math.sin(t * 0.6) * 0.08;
+  endHalo.material.opacity = 0.62 + Math.sin(t * 0.6) * 0.06;
 }

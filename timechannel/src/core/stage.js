@@ -8,6 +8,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { isMobile } from '../config.js';
+import { godRaysPass } from './godrays.js';
 
 export const canvas = document.getElementById('canvas');
 
@@ -25,6 +26,9 @@ camera.position.set(0, 0, 0);
 
 export const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
+
+// 体积光束：在 bloom 之前，让放射的光束本身也被 bloom，"洒"得更柔
+composer.addPass(godRaysPass);
 
 export const BLOOM_BASE = isMobile ? 0.38 : 0.5;
 export const bloom = new UnrealBloomPass(
