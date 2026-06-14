@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0612">
+<title>TimeChannel · A Tunnel of Memories</title>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div id="title">
+  <h1>TIME CHANNEL</h1>
+  <p>drift through your memories · v9</p>
+</div>
+
+<div id="toolbar">
+  <button class="btn" id="btnUpload">⊕ My Photos</button>
+  <button class="btn" id="btnCruise">✦ Auto Cruise</button>
+  <button class="btn" id="btnSky">◐ Sky</button>
+</div>
+<div id="skyPanel">
+  <div class="swatch" data-sky="lavender" title="Lavender" style="background: linear-gradient(135deg,#6b4a8c,#b06a78)"></div>
+  <div class="swatch" data-sky="rose" title="Rose" style="background: linear-gradient(135deg,#8c3a55,#d98a78)"></div>
+  <div class="swatch" data-sky="ocean" title="Ocean" style="background: linear-gradient(135deg,#1e4a7a,#3a9ab0)"></div>
+  <div class="swatch" data-sky="aurora" title="Aurora" style="background: linear-gradient(135deg,#1a6a52,#6ab070)"></div>
+  <div class="swatch" data-sky="ember" title="Ember" style="background: linear-gradient(135deg,#7a3a16,#d98a3a)"></div>
+  <div class="swatch" data-sky="rainbow" title="Rainbow" style="background: conic-gradient(#e66,#ec6,#6c6,#6cc,#66e,#c6c,#e66)"></div>
+</div>
+<div id="uploadPanel">
+  <button class="up-opt" id="optFiles">🖼&nbsp; Photos…</button>
+  <button class="up-opt" id="optFolder">📁&nbsp; Folder / Photos Library…</button>
+</div>
+<input type="file" id="fileInput" accept="image/*,.heic,.heif" multiple hidden>
+<input type="file" id="dirInput" webkitdirectory hidden>
+<div id="toast"></div>
+
+<div id="hint">
+  <div class="scroll-icon"></div>
+  scroll / drag / swipe to travel · W S forward / back · A D zoom · click a photo
+</div>
+
+<div id="depth">
+  <div class="num" id="depthNum">today</div>
+  <div class="label" id="depthLabel">into the past</div>
+</div>
+
+<div id="tip"></div>
+
+<div id="focusInfo">
+  <button class="nav" id="prevBtn" aria-label="previous">‹</button>
+  <div class="meta">
+    <div class="fdate" id="focusDate"></div>
+    <div class="fhint">scroll or ← → to browse · click to return</div>
+  </div>
+  <button class="nav" id="nextBtn" aria-label="next">›</button>
+</div>
+
+<div id="storyPanel">
+  <div class="sp-head">S T O R Y</div>
+  <div class="sp-list" id="storyList"></div>
+  <div class="sp-input">
+    <textarea id="storyText" rows="2" placeholder="write the story of this moment…"></textarea>
+    <button id="storyAdd" aria-label="add">＋</button>
+  </div>
+</div>
+
+<div id="timeline">
+  <div class="years" id="tlYears"></div>
+  <div class="track" id="tlTrack"><div class="knob" id="tlKnob"></div></div>
+</div>
+
+<div id="dropzone">drop your photos into time</div>
+
+<div id="loader">
+  <div class="ring"></div>
+  <div class="text">opening the time tunnel</div>
+</div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

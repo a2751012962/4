@@ -1,0 +1,6 @@
+node_modules/
+# dist/ 构建产物随仓库提交：游戏离线(file://)运行需要它
+.DS_Store
+.claude/
+index.html.bak
+docs/media/*-source.mov
