@@ -1,8 +1,8 @@
 "use strict";
 /* ---------- 主菜单 ---------- */
-const STAGES=[stageIntro, stageNight1, stageNight2, stageNight3, stageNight4];
-const STAGE_NAMES=["序章","第一晚 · 海之房","第二晚 · 山之房","第三晚 · 夜之房","第四晚 · 保管库"];
-const OWNED_BY_STAGE=[[],[],['sailor'],['sailor','hiker'],['sailor','hiker','onesie']];
+const STAGES=[stageIntro, stageInkwash, stageNight1, stageNight2, stageNight3, stageNight4];
+const STAGE_NAMES=["序章","创意环节 · 水墨流云","第一晚 · 海之房","第二晚 · 山之房","第三晚 · 夜之房","第四晚 · 保管库"];
+const OWNED_BY_STAGE=[[],[],[],['sailor'],['sailor','hiker'],['sailor','hiker','onesie']];
 
 async function mainMenu(){
   const save=loadProgress();

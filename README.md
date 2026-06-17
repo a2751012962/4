@@ -9,8 +9,8 @@
 - `js/core.js` — 基础工具 + WebAudio 音效
 - `js/engine.js` — 场景/打字机/问答引擎
 - `js/fx.js` — 特效（故障字、红色警报、心跳、粒子）
-- `js/games/` — 四晚小游戏（行船 / 跑酷 / 手电筒 / 3D走廊）
-- `js/stages/` — 五个章节剧本（intro / night1-4），每章一个文件
+- `js/games/` — 小游戏（行船 / 跑酷 / 手电筒 / 3D走廊 / 水墨流云创意环节 inkwash）
+- `js/stages/` — 章节剧本（intro / inkwash 创意环节 / night1-4），每章一个文件
 - `js/menu.js` — 主菜单与存档入口
 - `js/app.js` — 启动器
 
