@@ -68,17 +68,17 @@ async function stageNight2(){
 
   /* 雾墙追逐 */
   await screenType([
-    "雾散开的一瞬间，你听见身后传来低低的轰鸣。",
-    "不是风。",
-    "是那团红雾——它把来时的路，一寸一寸地吃掉了。",
-    "徒步熊把灯别在胸前，抓住你的手腕：",
-    "「别看后面。跟我跑。」"
-  ],"开 始 攀 登",58);
-  await climbGame();
+    "雾散了。走廊尽头，有一道裂缝通向外面。",
+    "外面是……云。",
+    "云上漂着一座塔。塔上的桥，断了。",
+    "徒步熊把灯递给你：",
+    "「有什么东西在等你转动它。慢慢看。」"
+  ],"前 往 旋 塔",58);
+  await monumentGame();
   await screenType([
-    "山顶。雾停在了山腰，像被一条看不见的线拦住。",
-    "徒步熊喘着气，把灯举起来照你——",
-    "「现在，趁它没缓过来。回答。」"
+    "光门的那一边，是普通的走廊。",
+    "徒步熊在后面跟来，把灯收起来：",
+    "「旋转的时候，你有没有想起什么？回答。」"
   ],"继 续",58);
   await askInput({ question: CONFIG.nights[1].question, answers: CONFIG.nights[1].answers, hint: CONFIG.nights[1].hint });
   await memoryScene(1);
