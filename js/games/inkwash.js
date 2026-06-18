@@ -11,7 +11,7 @@ function inkwashGame(){
     const root=document.createElement('div'); root.id='ink-stage';
     root.innerHTML=`
       <canvas id="ink-c" width="2560" height="1440"></canvas>
-      <div class="ink-title"><h1>${C.cardTitle||"水墨流韵"}</h1><div class="sub">SHUI MO LIU YUN · Sumi-e on Water</div></div>
+      <div class="ink-title"><h1>水墨流韵</h1><div class="sub">SHUI MO LIU YUN · Sumi-e on Water</div></div>
       <div class="ink-seal">墨韵</div>
       <div class="ink-poem"><span>坐看云起时</span><span>行到水穷处</span><span class="poem-en">Sit, watch clouds rise · Walk till waters end</span></div>
       <div class="ink-hint" id="ink-hint">${C.hint||C.tip||"拖 动 落 墨 · D R A G   T O   P A I N T"}</div>
@@ -110,8 +110,6 @@ function inkwashGame(){
     const VERT=`precision highp float; attribute vec2 aPosition; varying vec2 vUv,vL,vR,vT,vB; uniform vec2 texelSize;
       void main(){ vUv=aPosition*0.5+0.5; vL=vUv-vec2(texelSize.x,0.0); vR=vUv+vec2(texelSize.x,0.0);
       vT=vUv+vec2(0.0,texelSize.y); vB=vUv-vec2(0.0,texelSize.y); gl_Position=vec4(aPosition,0.0,1.0); }`;
-    const FRAG_COPY=`precision mediump float; precision mediump sampler2D; varying vec2 vUv; uniform sampler2D uTexture;
-      void main(){ gl_FragColor=texture2D(uTexture,vUv); }`;
     const FRAG_FADE=`precision mediump float; precision mediump sampler2D; varying vec2 vUv; uniform sampler2D uTexture; uniform float value;
       void main(){ gl_FragColor=value*texture2D(uTexture,vUv); }`;
     const FRAG_SPLAT=`precision highp float; precision highp sampler2D; varying vec2 vUv; uniform sampler2D uTarget;
@@ -175,7 +173,7 @@ function inkwashGame(){
         else { gl.viewport(0,0,target.width,target.height); gl.bindFramebuffer(gl.FRAMEBUFFER,target.fbo); }
         gl.drawElements(gl.TRIANGLES,6,gl.UNSIGNED_SHORT,0); }; })();
 
-    const progCopy=makeProgram(FRAG_COPY), progFade=makeProgram(FRAG_FADE), progSplat=makeProgram(FRAG_SPLAT);
+    const progFade=makeProgram(FRAG_FADE), progSplat=makeProgram(FRAG_SPLAT);
     const progAdvect=makeProgram(FRAG_ADVECT, supportLinear?null:['MANUAL_FILTERING']);
     const progDivergence=makeProgram(FRAG_DIVERGENCE), progCurl=makeProgram(FRAG_CURL), progVorticity=makeProgram(FRAG_VORTICITY);
     const progPressure=makeProgram(FRAG_PRESSURE), progGradient=makeProgram(FRAG_GRADIENT), progDisplay=makeProgram(FRAG_DISPLAY);

@@ -305,7 +305,7 @@ canvas.game { image-rendering: pixelated; image-rendering: crisp-edges; }
 
 /* ============ 创意环节 · 水墨流云（移植自 shuimo-liuyun，全部作用域到 #ink-stage） ============ */
 #ink-stage{
-  position:fixed; inset:0; z-index:40; overflow:hidden;
+  position:fixed; inset:0; z-index:55; overflow:hidden;  /* 高于 #grain(51)/#vignette(50)：创意环节保持宣纸明亮，不被颗粒/暗角压暗 */
   --xuan:#f2ecdf; --mo:#1c1c22; --dai:#1c4b7d; --zhu:#c23b2e; --zhuq:#3a7d5d; --teng:#c9941a;
   --line:rgba(28,28,34,.18);
   background:var(--xuan); color:var(--mo);
