@@ -79,11 +79,10 @@ export function buildFireplace(ctx) {
   const frameMat = M.brass;
   const pf = new THREE.Group(); pf.position.set(0, FLOOR_Y + 9.0, z - 0.3);
   const pframe = box(5.4, 3.8, 0.2, frameMat); pf.add(pframe);
-  const pcanvas = new THREE.Mesh(new THREE.PlaneGeometry(4.9, 3.3), new THREE.MeshBasicMaterial({ map: painting(0) })); pcanvas.position.z = 0.12; pf.add(pcanvas);
-  const plight = new THREE.PointLight(0xffe2ac, 0.5, 8, 2); plight.position.set(0, FLOOR_Y + 11.0, z + 1.0); pf.add(plight);
-  g.add(pf);
+  const pcanvas = new THREE.Mesh(new THREE.PlaneGeometry(4.9, 3.3), new THREE.MeshStandardMaterial({ map: painting(0), roughness: 0.92, envMapIntensity: 0.3 })); pcanvas.position.z = 0.12; pf.add(pcanvas); // 受光油画，不再像窗户一样抢焦
+  g.add(pf); // 画灯改为不占实时光源（靠炉火/环境）
 
-  // 炉台烛台（两座，带跳动烛火）
+  // 炉台烛台（两座，带跳动烛火；火苗用 emissive sprite，不再各开一盏实时点光）
   const candleAnims = [];
   for (const cx of [-3.3, 3.3]) {
     const stand2 = cyl(0.16, 0.22, 0.2, M.brass, 14); stand2.position.set(cx, FLOOR_Y + 6.8, z + 0.1); g.add(stand2);
@@ -91,8 +90,7 @@ export function buildFireplace(ctx) {
     const candle = cyl(0.1, 0.11, 0.7, new THREE.MeshStandardMaterial({ color: 0xf0e4c8, roughness: 0.6 }), 12); candle.position.set(cx, FLOOR_Y + 7.5, z + 0.1); g.add(candle);
     const fl = new THREE.Sprite(new THREE.SpriteMaterial({ map: flameTex, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }));
     fl.scale.set(0.4, 0.7, 1); fl.position.set(cx, FLOOR_Y + 8.0, z + 0.1); g.add(fl);
-    const cl = new THREE.PointLight(0xffcf7a, 0.6, 7, 2); cl.position.copy(fl.position); g.add(cl); cl.userData.base = 0.6;
-    candleAnims.push({ fl, cl });
+    candleAnims.push({ fl });
   }
 
   // 炉台座钟
@@ -108,9 +106,12 @@ export function buildFireplace(ctx) {
   const tbody = ball(0.28, new THREE.MeshStandardMaterial({ color: 0xd9a24a, emissive: 0xffcf7a, emissiveIntensity: 0.9, roughness: 0.42, metalness: 0.12 }), 24);
   const tcap = cone(0.24, 0.24, new THREE.MeshStandardMaterial({ color: 0x7a4a22, emissive: 0x6a3a18, emissiveIntensity: 0.4, roughness: 0.7 }), 18); tcap.position.y = 0.3;
   toy.add(tbody, tcap);
-  const tglow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xffd98a, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending, depthWrite: false }));
-  tglow.scale.set(2.0, 2.0, 1); toy.add(tglow);
+  const tglow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xffd98a, transparent: true, opacity: 0.75, blending: THREE.AdditiveBlending, depthWrite: false }));
+  tglow.scale.set(2.8, 2.8, 1); toy.add(tglow);
   toy.userData.body = tbody;
+  // 钥匙专属暖光：让它成为画面里最亮的暖点（焦点）
+  const keyLight = new THREE.PointLight(0xffd9a0, 1.6, 9, 2);
+  keyLight.position.set(0, 0.2, 0.4); toy.add(keyLight);
   g.add(toy);
   ctx.toy = toy; ctx.toyGlow = tglow;
 
@@ -129,11 +130,11 @@ export function buildFireplace(ctx) {
       f.mesh.scale.y = (0.9 + Math.sin(t * 9 + f.ph) * 0.12) * (0.85 + flick * 0.2);
       f.mesh.scale.x = 0.9 + Math.sin(t * 7 + f.ph * 2) * 0.08;
     }
-    for (const { fl, cl } of candleAnims) {
+    for (const { fl } of candleAnims) {
       const cf = 0.8 + Math.sin(t * 13 + fl.position.x) * 0.18 + Math.sin(t * 27) * 0.08;
       fl.material.opacity = 0.7 + cf * 0.3; fl.scale.set(0.32 + cf * 0.12, 0.6 + cf * 0.18, 1);
-      cl.intensity = cl.userData.base * cf;
     }
+    keyLight.intensity = 1.6 + flick * 0.5; // 钥匙专属暖光，随炉火轻颤
     // 余烬上升
     for (let i = 0; i < N; i++) {
       ePos[i * 3 + 1] += dt * (0.6 + seed[i] * 0.8);

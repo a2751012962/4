@@ -25,7 +25,7 @@ export function buildDesk(ctx) {
   const lampStem = cyl(0.04, 0.04, 0.6, M.brass, 10); lampStem.position.set(-1.3, 2.15, -0.4); g.add(lampStem);
   const shade = new THREE.Mesh(new THREE.SphereGeometry(0.42, 18, 12, 0, Math.PI * 2, 0, Math.PI / 2),
     new THREE.MeshStandardMaterial({ color: 0x1e5a3a, emissive: 0x2e7a4a, emissiveIntensity: 0.7, roughness: 0.5, side: THREE.DoubleSide }));
-  shade.position.set(-1.3, 2.45, -0.4); shade.rotation.x = Math.PI; g.add(shade);
+  shade.position.set(-1.3, 2.45, -0.4); g.add(shade); // 罩口朝下罩住灯泡（原先翻转成口朝上露泡）
   const lampLight = new THREE.PointLight(0xffe6a8, 0.9, 9, 2); lampLight.position.set(-1.3, 2.25, -0.4); g.add(lampLight); lampLight.userData.base = 0.9;
 
   // 摊开的书

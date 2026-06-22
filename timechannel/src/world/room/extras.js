@@ -70,8 +70,9 @@ export function buildExtras(ctx) {
     const ringBot = ringTop.clone(); ringBot.position.y = cageY - 0.8; g.add(ringBot);
     const floorB = cyl(0.55, 0.55, 0.1, M.oakDark, 18); floorB.position.y = cageY - 0.8; g.add(floorB);
     for (let i = 0; i < 14; i++) { const a = (i / 14) * Math.PI * 2; const bar = cyl(0.012, 0.012, 1.6, M.brass, 4); bar.position.set(Math.cos(a) * 0.55, cageY, Math.sin(a) * 0.55); g.add(bar); }
-    const dome = ball(0.55, M.brass, 12, 0); dome.scale.set(1, 0.5, 1); dome.position.y = cageY + 0.8; // 顶
-    const domeMesh = new THREE.Mesh(new THREE.SphereGeometry(0.55, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xb08a3a, metalness: 0.9, roughness: 0.3, wireframe: true })); domeMesh.position.y = cageY + 0.8; g.add(domeMesh);
+    // 实心黄铜半球顶（之前是线框，渲染为杂乱三角线）+ 顶钮
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(0.55, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), M.brass); dome.scale.set(1, 0.7, 1); dome.position.y = cageY + 0.8; g.add(dome);
+    const finial = ball(0.08, M.brass, 8); finial.position.y = cageY + 1.2; g.add(finial);
     // 小鸟
     const bird = new THREE.Group(); bird.position.set(0, cageY - 0.5, 0);
     const bbody = ball(0.12, new THREE.MeshStandardMaterial({ color: 0xf0c030, roughness: 0.7 }), 12); bbody.scale.set(1, 1.2, 1); bird.add(bbody);

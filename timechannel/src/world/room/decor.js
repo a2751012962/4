@@ -29,7 +29,7 @@ export function buildDecor(ctx) {
     const tex = ctx.photoTex ? ctx.photoTex(pi) : painting(pi);
     const ph = new THREE.Mesh(new THREE.PlaneGeometry(fw * 0.84, fh * 0.84), new THREE.MeshBasicMaterial({ map: tex })); ph.position.z = 0.08; grp.add(ph);
     // 小画灯
-    if (rnd() < 0.5) { const hood = box(fw * 0.6, 0.16, 0.3, gold); hood.position.set(0, fh / 2 + 0.2, 0.3); grp.add(hood); const pl = new THREE.PointLight(0xffe2ac, 0.28, 4.5, 2); pl.position.set(0, fh / 2, 0.6); grp.add(pl); }
+    if (rnd() < 0.5) { const hood = box(fw * 0.6, 0.16, 0.3, gold); hood.position.set(0, fh / 2 + 0.2, 0.3); grp.add(hood); } // 画灯只留黄铜罩，不占实时光源
     scene.add(grp); pi++;
   }
 
@@ -43,8 +43,7 @@ export function buildDecor(ctx) {
     const cupp = cyl(0.14, 0.08, 0.2, M.brass, 12); cupp.position.set(0, 0.2, 0.5); s.add(cupp);
     const fl = new THREE.Sprite(new THREE.SpriteMaterial({ map: flameTex, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }));
     fl.scale.set(0.45, 0.8, 1); fl.position.set(0, 0.55, 0.5); s.add(fl);
-    const pl = new THREE.PointLight(0xffbf70, 0.7, 9, 2); pl.position.set(0, 0.55, 0.7); s.add(pl); pl.userData.base = 0.7;
-    scene.add(s); sconceFlames.push({ fl, pl });
+    scene.add(s); sconceFlames.push({ fl }); // 火苗 emissive+bloom 即可，不开实时点光
   }
 
   /* ---------- 落地大摆钟（后墙角） ---------- */
@@ -87,10 +86,9 @@ export function buildDecor(ctx) {
 
   // 动画：壁灯火苗 + 钟摆
   anim.push((dt, t) => {
-    for (const { fl, pl } of sconceFlames) {
+    for (const { fl } of sconceFlames) {
       const cf = 0.8 + Math.sin(t * 12 + fl.position.z) * 0.18 + Math.sin(t * 26) * 0.08;
       fl.material.opacity = 0.7 + cf * 0.3; fl.scale.set(0.4 + cf * 0.12, 0.7 + cf * 0.2, 1);
-      pl.intensity = pl.userData.base * cf;
     }
     pend.rotation.z = Math.sin(t * 1.6) * 0.16;
     cm.rotation.z = -t * 0.5; ch.rotation.z = -t * 0.04;

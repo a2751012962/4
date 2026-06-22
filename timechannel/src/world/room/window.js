@@ -23,27 +23,27 @@ export function buildWindow(ctx) {
   const x = W / 2 - 0.4;
   const g = new THREE.Group(); g.position.set(x, FLOOR_Y, 6); g.rotation.y = -Math.PI / 2;
 
+  // 窗的结构件整体抬到地板以上（此前置于局部 y≈0，随 group 沉到地板下了）
+  const win = new THREE.Group(); win.position.y = 4.7; g.add(win);
   // 大窗框
   const frameMat = new THREE.MeshStandardMaterial({ color: 0x3a2614, roughness: 0.7 });
-  g.add(box(8.5, 9.5, 0.5, frameMat));
+  win.add(box(8.5, 9.5, 0.5, frameMat));
   // 玻璃（暖夕光）
   const pane = new THREE.Mesh(new THREE.PlaneGeometry(7.4, 8.4), new THREE.MeshBasicMaterial({ map: skyGlassTex() }));
-  pane.position.set(0, 0.5, 0.2); g.add(pane);
+  pane.position.set(0, 0.5, 0.2); win.add(pane);
   const paneGlow = new THREE.Mesh(new THREE.PlaneGeometry(7.4, 8.4), new THREE.MeshBasicMaterial({ map: softSprite('rgba(255,228,176,0.7)', 'rgba(255,200,120,0)', 'glow'), transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false }));
-  paneGlow.position.set(0, 0.5, 0.24); g.add(paneGlow);
+  paneGlow.position.set(0, 0.5, 0.24); win.add(paneGlow);
   // 窗棂格（3×4）
-  for (const yy of [-3, -1, 1, 3]) { const m = box(7.6, 0.14, 0.34, frameMat); m.position.set(0, yy + 0.5, 0.26); g.add(m); }
-  for (const xx of [-2.4, 0, 2.4]) { const m = box(0.14, 8.6, 0.34, frameMat); m.position.set(xx, 0.5, 0.26); g.add(m); }
+  for (const yy of [-3, -1, 1, 3]) { const m = box(7.6, 0.14, 0.34, frameMat); m.position.set(0, yy + 0.5, 0.26); win.add(m); }
+  for (const xx of [-2.4, 0, 2.4]) { const m = box(0.14, 8.6, 0.34, frameMat); m.position.set(xx, 0.5, 0.26); win.add(m); }
   // 厚重窗帘（两侧 + 上方帘头）
   const cur = M.velvetRed;
   for (const sx of [-4.4, 4.4]) {
-    const drape = box(1.6, 9.4, 0.5, cur); drape.position.set(sx, 0.3, 0.6); drape.rotation.y = sx < 0 ? 0.1 : -0.1; g.add(drape);
-    // 帘褶
-    for (let i = 0; i < 4; i++) { const fold = cyl(0.16, 0.16, 9.0, cur, 8); fold.position.set(sx - 0.5 + i * 0.32, 0.3, 0.85); g.add(fold); }
+    const drape = box(1.6, 9.4, 0.5, cur); drape.position.set(sx, 0.3, 0.6); drape.rotation.y = sx < 0 ? 0.1 : -0.1; win.add(drape);
+    for (let i = 0; i < 4; i++) { const fold = cyl(0.16, 0.16, 9.0, cur, 8); fold.position.set(sx - 0.5 + i * 0.32, 0.3, 0.85); win.add(fold); }
   }
-  const valance = box(9.0, 1.2, 0.6, cur); valance.position.set(0, 4.6, 0.6); g.add(valance);
-  // 系带
-  for (const sx of [-4.4, 4.4]) { const tie = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.12, 8, 16), M.brass); tie.position.set(sx, 0.5, 0.9); tie.rotation.y = Math.PI / 2; g.add(tie); }
+  const valance = box(9.0, 1.2, 0.6, cur); valance.position.set(0, 4.6, 0.6); win.add(valance);
+  for (const sx of [-4.4, 4.4]) { const tie = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.12, 8, 16), M.brass); tie.position.set(sx, 0.5, 0.9); tie.rotation.y = Math.PI / 2; win.add(tie); }
 
   // 飘窗座（连墙长凳 + 软垫 + 抱枕）
   const seat = box(8.0, 1.2, 2.0, M.oakMed); seat.position.set(0, -H / 2 + 1.2 + 0.6 - FLOOR_Y * 0 - (H / 2) + 0, 1.4);
@@ -63,8 +63,6 @@ export function buildWindow(ctx) {
 
   castAll(g, true, true);
   scene.add(g);
-
-  // 透进来的暖光（在窗内侧补一盏，呼应主投影光）
-  const wl = new THREE.PointLight(0xffcf94, 1.1, 30, 1.4); wl.position.set(x - 3, 1, 6); scene.add(wl);
+  // 窗光由 lighting.js 的方向光统一负责，这里不再额外开点光（减实时光源）
   return g;
 }

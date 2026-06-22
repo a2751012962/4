@@ -10,7 +10,7 @@ export function buildSecondLibrary(ctx) {
   const { scene, M } = ctx;
   const rnd = mulberry(771);
   const g = new THREE.Group();
-  g.position.set(-12.5, FLOOR_Y, 9);
+  g.position.set(-12.5, FLOOR_Y + (H - 1.6) / 2, 9); // 柜体中心抬到 caseH/2，柜底正好落地（此前沉到地板下）
   g.rotation.y = -Math.PI / 2; // 面朝房间内（沿 z 展开）
 
   const caseW = 9.0, caseH = H - 1.6, caseD = 1.5;

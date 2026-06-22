@@ -20,7 +20,7 @@ function harp(M) {
     const tt = i / 29;
     const len = 0.8 + tt * 3.4;
     const x = 0.1 + tt * 1.7;
-    const yTop = 4.6 - tt * 0.0;
+    const yTop = 4.6 - tt * 1.6; // 琴弦顶端沿琴颈斜线下降（原先 *0 使顶端齐平）
     const str = cyl(0.006, 0.006, len, new THREE.MeshStandardMaterial({ color: i % 5 === 0 ? 0xd03030 : 0xe8e0c8, roughness: 0.5, metalness: 0.3 }), 4);
     str.position.set(x, yTop - len / 2 + 0.3, 0); str.rotation.z = -0.25; g.add(str);
   }

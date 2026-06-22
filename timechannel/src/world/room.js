@@ -82,7 +82,7 @@ function photoTex(i) {
 function build() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x150d06);
-  scene.fog = new THREE.FogExp2(0x1a0f06, 0.012);
+  scene.fog = new THREE.FogExp2(0x241606, 0.0098); // 暖棕雾，远墙读作木色而非死黑
   setupEnvironment(renderer, scene); // 图像化环境反射，金属/玻璃/木器更真实
   ctx = { scene, M: materials(), anim: [], toy: null, toyGlow: null, photoTex };
 
@@ -99,7 +99,6 @@ function build() {
   buildNook(ctx);
   buildGallery2(ctx);
   buildDoor(ctx);
-  buildBilliards(ctx);
   buildInstruments(ctx);
   buildExtras(ctx);
   buildStaircase(ctx);
@@ -108,16 +107,12 @@ function build() {
   buildSmallprops(ctx);
   buildRugs(ctx);
   buildInstancedBooks(ctx);
-  buildDiningNook(ctx);
-  buildBusts(ctx);
-  buildOrrery(ctx);
+  buildOrrery(ctx);          // 保留一件"时间/宇宙"诗意仪器
   buildGallery3(ctx);
   buildScreen(ctx);
   buildTerrarium(ctx);
   buildCoffers(ctx);
   buildFrieze(ctx);
-  buildModelShip(ctx);
-  buildGlobeBar(ctx);
   buildAtlas(ctx);
   buildTorcheres(ctx);
   buildCurios(ctx);
@@ -127,10 +122,13 @@ function build() {
   buildSecondLibrary(ctx);
   buildArmoire(ctx);
   buildShelftop(ctx);
-  buildUrns(ctx);
   buildMantel(ctx);
-  buildCardTable(ctx);
   buildEntry(ctx);
+  // —— 经美术评审裁撤的"陈列室"家具：台球桌/六人餐桌/牌桌/帆船模型/胸像/陶瓮/
+  //    地球仪酒柜（绿呢与原色过饱和、与"亲密书房"基调冲突、且占满负空间）。
+  //    模块代码保留，仅不再装配，让房间收敛为一间有焦点的暖色书房。
+  // buildBilliards / buildDiningNook / buildCardTable / buildModelShip /
+  // buildBusts / buildUrns / buildGlobeBar — intentionally not built.
   buildFinishings(ctx);
   buildPlants(ctx);
   buildClutter(ctx);
@@ -144,12 +142,12 @@ function build() {
 export function enter(onExitCb) {
   onExit = onExitCb;
   if (!scene) build();
-  entered = true; picked = false; yaw = -0.04; pitch = -0.05;
-  camera.position.set(0.5, FLOOR_Y + 5.0, 12.5); // 站在房间入口附近，望向壁炉
+  entered = true; picked = false; yaw = -0.11; pitch = 0.06; // 一进门就把视线引向壁炉台上的钥匙
+  camera.position.set(1.5, FLOOR_Y + 5.0, 8.5);
   camera.rotation.set(0, 0, 0); camera.rotation.order = 'YXZ';
-  camera.fov = 62; camera.updateProjectionMatrix();
-  renderer.toneMappingExposure = 1.15; // 从冲出白场的高曝光回到温暖室内
-  bloom.strength = 0.42;
+  camera.fov = 60; camera.updateProjectionMatrix();
+  renderer.toneMappingExposure = 1.12; // 暖而不过曝，让炉火主导
+  bloom.strength = 0.36; bloom.threshold = 0.88; // 只让真正的高光泛光，避免一片雾
   setRenderScene(scene);
   fp.setEnabled(true); // 开启 WASD 漫步
   if (clueEl) { clueEl.textContent = ROOM.clue; clueEl.classList.add('show'); }

@@ -8,7 +8,7 @@ import { ROOM_W as W, ROOM_D as D, FLOOR_Y, box, cyl, ball, cone, contactShadow,
 export function buildCurios(ctx) {
   const { scene, M } = ctx;
   const rnd = mulberry(1337);
-  const glass = new THREE.MeshPhysicalMaterial({ color: 0xcfe0e6, roughness: 0.05, metalness: 0, transmission: 0.7, thickness: 0.1, transparent: true, opacity: 0.3, envMapIntensity: 1.6 });
+  const glass = new THREE.MeshPhysicalMaterial({ color: 0xcfe0e6, roughness: 0.05, metalness: 0, transmission: 0.7, thickness: 0.1, transparent: true, opacity: 0.3, depthWrite: false, envMapIntensity: 1.6 });
 
   const g = new THREE.Group();
   g.position.set(W / 2 - 0.9, FLOOR_Y, -12);

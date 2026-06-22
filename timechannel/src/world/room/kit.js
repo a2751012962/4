@@ -297,16 +297,16 @@ export function materials() {
     oakLight: new THREE.MeshStandardMaterial({ map: woodGrain('#7e5a32', '#4a2e16', 3, 1, 'oakLight'), ...wN(1), roughness: 0.7, metalness: 0.07, envMapIntensity: 0.7 }),
     trim: new THREE.MeshStandardMaterial({ color: 0x4a3018, roughness: 0.6, envMapIntensity: 0.6 }),
     plaster: new THREE.MeshStandardMaterial({ map: plaster('#5a4634'), roughness: 0.95, side: THREE.BackSide }),
-    floor: new THREE.MeshStandardMaterial({ map: plankFloor(), ...wN(4), roughness: 0.6, metalness: 0.06, envMapIntensity: 0.8 }),
-    brass: new THREE.MeshStandardMaterial({ color: 0xb08a3a, roughness: 0.26, metalness: 0.95, emissive: 0x2a1c06, emissiveIntensity: 0.35, envMapIntensity: 1.3 }),
+    floor: new THREE.MeshStandardMaterial({ map: plankFloor(), ...wN(4), roughness: 0.72, metalness: 0.06, envMapIntensity: 0.5 }),
+    brass: new THREE.MeshStandardMaterial({ color: 0xc99a44, roughness: 0.32, metalness: 0.95, emissive: 0x2a1c06, emissiveIntensity: 0.2, envMapIntensity: 1.5 }),
     iron: new THREE.MeshStandardMaterial({ color: 0x26201a, roughness: 0.45, metalness: 0.8, envMapIntensity: 0.9 }),
     stone: new THREE.MeshStandardMaterial({ map: marble('#3a3026'), roughness: 0.45, metalness: 0.1, envMapIntensity: 0.8 }),
     glassWarm: new THREE.MeshStandardMaterial({ color: 0xffd9a0, emissive: 0xffcf94, emissiveIntensity: 0.7, roughness: 0.15, metalness: 0, transparent: true, opacity: 0.85, envMapIntensity: 1.4 }),
     leatherOx: new THREE.MeshStandardMaterial({ map: leather('#5a2e1a'), normalMap: leatherNormal(2), normalScale: new THREE.Vector2(0.5, 0.5), roughness: 0.55, metalness: 0.1, envMapIntensity: 0.5 }),
-    velvetRed: new THREE.MeshStandardMaterial({ map: fabric('#6a2535'), normalMap: fabricNormal(3), normalScale: new THREE.Vector2(0.3, 0.3), roughness: 0.92 }),
-    velvetGreen: new THREE.MeshStandardMaterial({ map: fabric('#274033'), normalMap: fabricNormal(3), normalScale: new THREE.Vector2(0.3, 0.3), roughness: 0.92 }),
+    velvetRed: new THREE.MeshStandardMaterial({ map: fabric('#6a2535'), normalMap: fabricNormal(3), normalScale: new THREE.Vector2(0.3, 0.3), roughness: 0.86, envMapIntensity: 0.3 }),
+    velvetGreen: new THREE.MeshStandardMaterial({ map: fabric('#2a3a30'), normalMap: fabricNormal(3), normalScale: new THREE.Vector2(0.3, 0.3), roughness: 0.86, envMapIntensity: 0.3 }),
     creamShade: new THREE.MeshStandardMaterial({ color: 0xf0e0c0, emissive: 0xffcf8a, emissiveIntensity: 0.6, roughness: 0.6, side: THREE.DoubleSide }),
-    glass: new THREE.MeshStandardMaterial({ color: 0xcfe0e6, roughness: 0.08, metalness: 0, transparent: true, opacity: 0.3, envMapIntensity: 1.5 }),
+    glass: new THREE.MeshStandardMaterial({ color: 0xcfe0e6, roughness: 0.08, metalness: 0, transparent: true, opacity: 0.3, depthWrite: false, envMapIntensity: 1.5 }),
     porcelainMat: new THREE.MeshStandardMaterial({ color: 0xf4f0e6, roughness: 0.25, metalness: 0.05, envMapIntensity: 0.9 }),
     silver: new THREE.MeshStandardMaterial({ color: 0xcfcfd4, roughness: 0.2, metalness: 0.95, envMapIntensity: 1.4 }),
   };
@@ -316,7 +316,7 @@ export function materials() {
    几何辅助
 ------------------------------------------------------------ */
 export function box(w, h, d, mat) { return new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); }
-export function cyl(rt, rb, h, mat, seg = 16) { return new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), mat); }
+export function cyl(rt, rb, h, mat, seg = 16, open = false) { return new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg, 1, open), mat); }
 export function ball(r, mat, s = 20) { return new THREE.Mesh(new THREE.SphereGeometry(r, s, s), mat); }
 export function cone(r, h, mat, seg = 16) { return new THREE.Mesh(new THREE.ConeGeometry(r, h, seg), mat); }
 

@@ -14,8 +14,8 @@ export function buildCabinet(ctx) {
   const body = box(5.0, 8.5, 1.6, M.oakDark); body.position.y = 4.25; cab.add(body);
   const cavity = box(4.4, 7.6, 1.2, new THREE.MeshStandardMaterial({ color: 0x3a2a1a, roughness: 0.9 })); cavity.position.set(0, 4.5, 0.2); cab.add(cavity);
   // 玻璃门（双扇）
-  const glass = new THREE.MeshPhysicalMaterial({ color: 0xcfe0e6, roughness: 0.06, metalness: 0, transmission: 0.7, thickness: 0.1, transparent: true, opacity: 0.32, envMapIntensity: 1.6 });
-  for (const sx of [-1.1, 1.1]) { const door = box(2.1, 7.4, 0.06, glass); door.position.set(sx, 4.5, 0.75); cab.add(door); const stile = box(2.2, 7.5, 0.1, M.oakMed); stile.position.set(sx, 4.5, 0.7); /* keep frame behind */ const muntinV = box(0.06, 7.2, 0.12, M.oakMed); muntinV.position.set(sx, 4.5, 0.78); cab.add(muntinV); for (let m = 0; m < 3; m++) { const mh = box(2.0, 0.06, 0.12, M.oakMed); mh.position.set(sx, 1.8 + m * 2.2, 0.78); cab.add(mh); } const knob = ball(0.1, M.brass, 10); knob.position.set(sx + (sx < 0 ? 0.9 : -0.9), 4.5, 0.82); cab.add(knob); }
+  const glass = new THREE.MeshPhysicalMaterial({ color: 0xcfe0e6, roughness: 0.06, metalness: 0, transmission: 0.7, thickness: 0.1, transparent: true, opacity: 0.32, depthWrite: false, envMapIntensity: 1.6 });
+  for (const sx of [-1.1, 1.1]) { const door = box(2.1, 7.4, 0.06, glass); door.position.set(sx, 4.5, 0.75); cab.add(door); const muntinV = box(0.06, 7.2, 0.12, M.oakMed); muntinV.position.set(sx, 4.5, 0.78); cab.add(muntinV); for (let m = 0; m < 3; m++) { const mh = box(2.0, 0.06, 0.12, M.oakMed); mh.position.set(sx, 1.8 + m * 2.2, 0.78); cab.add(mh); } const knob = ball(0.1, M.brass, 10); knob.position.set(sx + (sx < 0 ? 0.9 : -0.9), 4.5, 0.82); cab.add(knob); }
   // 玻璃隔板 + 陈列品
   const porc = M.porcelainMat, silver = M.silver;
   for (let s = 0; s < 4; s++) {

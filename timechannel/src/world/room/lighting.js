@@ -11,22 +11,22 @@ const flameTex = softSprite('rgba(255,236,170,1)', 'rgba(255,110,30,0)', 'flame'
 export function buildLighting(ctx) {
   const { scene, M, anim } = ctx;
 
-  scene.add(new THREE.AmbientLight(0xffe0bd, 0.42));
-  scene.add(new THREE.HemisphereLight(0xffd9a8, 0x140a04, 0.4));
+  scene.add(new THREE.AmbientLight(0xffe0bd, 0.32)); // 压低平光，让炉火/灯塑形
+  scene.add(new THREE.HemisphereLight(0xffd9a8, 0x140a04, 0.34));
 
-  // 凸窗暖夕光：主投影光
+  // 凸窗暖夕光：主投影光（黄昏，弱于炉火，仅作冷暖对比补光）
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  const sun = new THREE.DirectionalLight(0xffcf94, 1.4);
+  const sun = new THREE.DirectionalLight(0xffcf94, 0.7);
   sun.position.set(W / 2 - 1, 6, 6);
   sun.target.position.set(-4, FLOOR_Y + 1, -3);
   scene.add(sun); scene.add(sun.target);
   sun.castShadow = true;
-  const sm = isMobile ? 1024 : 2048;
+  const sm = isMobile ? 768 : 1536;
   sun.shadow.mapSize.set(sm, sm);
   sun.shadow.camera.near = 1; sun.shadow.camera.far = 60;
-  sun.shadow.camera.left = -22; sun.shadow.camera.right = 22;
-  sun.shadow.camera.top = 16; sun.shadow.camera.bottom = -16;
+  sun.shadow.camera.left = -15; sun.shadow.camera.right = 15;
+  sun.shadow.camera.top = 12; sun.shadow.camera.bottom = -12;
   sun.shadow.bias = -0.0005; sun.shadow.normalBias = 0.02;
 
   // 枝形吊灯
