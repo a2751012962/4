@@ -39,7 +39,7 @@ export const FLYOUT = { dur: 2.8, whiteAt: 0.55 };
 export const ROOM = {
   audioSrc: 'gymnopedie.mp3',      // 放到 timechannel/public/ 下，构建后与 index.html 同级；缺失则安静运行
   audioVolume: 0.55,
-  clue: '【改我】房间里有件小小的玩具——那是最后一把钥匙。找到它，点亮它。',
+  clue: '【改我】WASD 走动 · 拖动环视 —— 房间里有件小小的玩具，那是最后一把钥匙。找到它，点亮它。',
   pickedText: '【改我】钥匙到手了。该走了。',
 };
 

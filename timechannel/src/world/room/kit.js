@@ -4,6 +4,7 @@
    所有 builder 共用，保证全屋统一的暖色木质质感。
 ============================================================ */
 import * as THREE from 'three';
+import { woodNormal, fabricNormal, leatherNormal } from './kit2.js';
 
 /* 房间尺寸（米） */
 export const ROOM_W = 30;
@@ -288,22 +289,26 @@ export function mulberry(a) {
    材质库（共享，避免重复编译）
 ------------------------------------------------------------ */
 export function materials() {
+  const wN = (r) => ({ normalMap: woodNormal(r), normalScale: new THREE.Vector2(0.4, 0.4) });
   return {
-    oakWall: new THREE.MeshStandardMaterial({ map: woodGrain('#6e4a28', '#3c2614', 4, 1, 'oakWall'), roughness: 0.82, metalness: 0.05, side: THREE.BackSide }),
-    oakDark: new THREE.MeshStandardMaterial({ map: woodGrain('#4a3016', '#281606', 3, 1, 'oakDark'), roughness: 0.84, metalness: 0.05 }),
-    oakMed: new THREE.MeshStandardMaterial({ map: woodGrain('#6e4a28', '#3c2614', 3, 1, 'oakMed'), roughness: 0.8, metalness: 0.06 }),
-    oakLight: new THREE.MeshStandardMaterial({ map: woodGrain('#7e5a32', '#4a2e16', 3, 1, 'oakLight'), roughness: 0.78, metalness: 0.05 }),
-    trim: new THREE.MeshStandardMaterial({ color: 0x4a3018, roughness: 0.65 }),
+    oakWall: new THREE.MeshStandardMaterial({ map: woodGrain('#6e4a28', '#3c2614', 4, 1, 'oakWall'), ...wN(1), roughness: 0.82, metalness: 0.05, side: THREE.BackSide, envMapIntensity: 0.4 }),
+    oakDark: new THREE.MeshStandardMaterial({ map: woodGrain('#4a3016', '#281606', 3, 1, 'oakDark'), ...wN(1), roughness: 0.78, metalness: 0.06, envMapIntensity: 0.6 }),
+    oakMed: new THREE.MeshStandardMaterial({ map: woodGrain('#6e4a28', '#3c2614', 3, 1, 'oakMed'), ...wN(1), roughness: 0.74, metalness: 0.07, envMapIntensity: 0.7 }),
+    oakLight: new THREE.MeshStandardMaterial({ map: woodGrain('#7e5a32', '#4a2e16', 3, 1, 'oakLight'), ...wN(1), roughness: 0.7, metalness: 0.07, envMapIntensity: 0.7 }),
+    trim: new THREE.MeshStandardMaterial({ color: 0x4a3018, roughness: 0.6, envMapIntensity: 0.6 }),
     plaster: new THREE.MeshStandardMaterial({ map: plaster('#5a4634'), roughness: 0.95, side: THREE.BackSide }),
-    floor: new THREE.MeshStandardMaterial({ map: plankFloor(), roughness: 0.74, metalness: 0.04 }),
-    brass: new THREE.MeshStandardMaterial({ color: 0xb08a3a, roughness: 0.32, metalness: 0.85, emissive: 0x2a1c06, emissiveIntensity: 0.35 }),
-    iron: new THREE.MeshStandardMaterial({ color: 0x26201a, roughness: 0.5, metalness: 0.7 }),
-    stone: new THREE.MeshStandardMaterial({ map: marble('#3a3026'), roughness: 0.6, metalness: 0.08 }),
-    glassWarm: new THREE.MeshStandardMaterial({ color: 0xffd9a0, emissive: 0xffcf94, emissiveIntensity: 0.7, roughness: 0.25, metalness: 0, transparent: true, opacity: 0.85 }),
-    leatherOx: new THREE.MeshStandardMaterial({ map: leather('#5a2e1a'), roughness: 0.6, metalness: 0.1 }),
-    velvetRed: new THREE.MeshStandardMaterial({ map: fabric('#6a2535'), roughness: 0.95 }),
-    velvetGreen: new THREE.MeshStandardMaterial({ map: fabric('#274033'), roughness: 0.95 }),
+    floor: new THREE.MeshStandardMaterial({ map: plankFloor(), ...wN(4), roughness: 0.6, metalness: 0.06, envMapIntensity: 0.8 }),
+    brass: new THREE.MeshStandardMaterial({ color: 0xb08a3a, roughness: 0.26, metalness: 0.95, emissive: 0x2a1c06, emissiveIntensity: 0.35, envMapIntensity: 1.3 }),
+    iron: new THREE.MeshStandardMaterial({ color: 0x26201a, roughness: 0.45, metalness: 0.8, envMapIntensity: 0.9 }),
+    stone: new THREE.MeshStandardMaterial({ map: marble('#3a3026'), roughness: 0.45, metalness: 0.1, envMapIntensity: 0.8 }),
+    glassWarm: new THREE.MeshStandardMaterial({ color: 0xffd9a0, emissive: 0xffcf94, emissiveIntensity: 0.7, roughness: 0.15, metalness: 0, transparent: true, opacity: 0.85, envMapIntensity: 1.4 }),
+    leatherOx: new THREE.MeshStandardMaterial({ map: leather('#5a2e1a'), normalMap: leatherNormal(2), normalScale: new THREE.Vector2(0.5, 0.5), roughness: 0.55, metalness: 0.1, envMapIntensity: 0.5 }),
+    velvetRed: new THREE.MeshStandardMaterial({ map: fabric('#6a2535'), normalMap: fabricNormal(3), normalScale: new THREE.Vector2(0.3, 0.3), roughness: 0.92 }),
+    velvetGreen: new THREE.MeshStandardMaterial({ map: fabric('#274033'), normalMap: fabricNormal(3), normalScale: new THREE.Vector2(0.3, 0.3), roughness: 0.92 }),
     creamShade: new THREE.MeshStandardMaterial({ color: 0xf0e0c0, emissive: 0xffcf8a, emissiveIntensity: 0.6, roughness: 0.6, side: THREE.DoubleSide }),
+    glass: new THREE.MeshStandardMaterial({ color: 0xcfe0e6, roughness: 0.08, metalness: 0, transparent: true, opacity: 0.3, envMapIntensity: 1.5 }),
+    porcelainMat: new THREE.MeshStandardMaterial({ color: 0xf4f0e6, roughness: 0.25, metalness: 0.05, envMapIntensity: 0.9 }),
+    silver: new THREE.MeshStandardMaterial({ color: 0xcfcfd4, roughness: 0.2, metalness: 0.95, envMapIntensity: 1.4 }),
   };
 }
 

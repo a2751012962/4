@@ -11,7 +11,8 @@ import { ROOM } from '../config.js';
 import { photoItems } from '../album/album.js';
 import { playRoomMusic, stopRoomMusic } from '../audio.js';
 import { flow } from '../flow.js';
-import { materials, painting, ROOM_H, FLOOR_Y } from './room/kit.js';
+import { materials, painting, ROOM_H, ROOM_W, ROOM_D, FLOOR_Y } from './room/kit.js';
+import { setupEnvironment } from './room/kit2.js';
 import { buildStructure } from './room/structure.js';
 import { buildLibrary } from './room/library.js';
 import { buildFireplace } from './room/fireplace.js';
@@ -21,6 +22,16 @@ import { buildWindow } from './room/window.js';
 import { buildDecor } from './room/decor.js';
 import { buildLighting } from './room/lighting.js';
 import { buildAtmosphere } from './room/atmosphere.js';
+import { buildPiano } from './room/piano.js';
+import { buildBarCart } from './room/barcart.js';
+import { buildPlants } from './room/plants.js';
+import { buildClutter } from './room/clutter.js';
+import { buildNook } from './room/nook.js';
+import { buildCabinet } from './room/cabinet.js';
+import { buildGallery2 } from './room/gallery2.js';
+import { buildDoor } from './room/door.js';
+import { buildCat } from './room/cat.js';
+import * as fp from './room/firstperson.js';
 
 let ctx = null, scene = null, toy = null, toyGlow = null;
 let entered = false, picked = false, onExit = null;
@@ -39,6 +50,7 @@ function build() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x150d06);
   scene.fog = new THREE.FogExp2(0x1a0f06, 0.012);
+  setupEnvironment(renderer, scene); // 图像化环境反射，金属/玻璃/木器更真实
   ctx = { scene, M: materials(), anim: [], toy: null, toyGlow: null, photoTex };
 
   buildStructure(ctx);
@@ -48,6 +60,15 @@ function build() {
   buildDesk(ctx);
   buildWindow(ctx);
   buildDecor(ctx);
+  buildPiano(ctx);
+  buildBarCart(ctx);
+  buildCabinet(ctx);
+  buildNook(ctx);
+  buildGallery2(ctx);
+  buildDoor(ctx);
+  buildPlants(ctx);
+  buildClutter(ctx);
+  buildCat(ctx);
   buildLighting(ctx);
   buildAtmosphere(ctx);
 
@@ -64,6 +85,7 @@ export function enter(onExitCb) {
   renderer.toneMappingExposure = 1.15; // 从冲出白场的高曝光回到温暖室内
   bloom.strength = 0.42;
   setRenderScene(scene);
+  fp.setEnabled(true); // 开启 WASD 漫步
   if (clueEl) { clueEl.textContent = ROOM.clue; clueEl.classList.add('show'); }
   playRoomMusic();
 }
@@ -71,6 +93,7 @@ export function enter(onExitCb) {
 export function update(dt, t) {
   if (!entered) return;
   camera.rotation.y = yaw; camera.rotation.x = pitch;
+  fp.update(dt, camera, yaw); // WASD 走动 + 脚步起伏
   for (const fn of ctx.anim) fn(dt, t);
   if (toy) {
     toy.rotation.y += dt * 0.7;
@@ -100,6 +123,7 @@ function tryPick(e) {
 function pickToy() {
   if (picked || !toy) return;
   picked = true;
+  fp.setEnabled(false);
   if (clueEl) clueEl.textContent = ROOM.pickedText;
   stopRoomMusic();
   setTimeout(() => { if (clueEl) clueEl.classList.remove('show'); flow.mode = 'done'; entered = false; if (onExit) onExit(); }, 1800);
