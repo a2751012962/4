@@ -47,6 +47,7 @@ function startFlyout() {
   if (flow.mode !== 'tunnel') return;
   flow.mode = 'flyout'; flyStart = performance.now();
   focus.closeFocus();
+  document.body.classList.add('tc-immersive'); // 隐藏隧道所有 HUD/标题/时间轴等，进入沉浸终章
 }
 
 // 白场峰值 → 落入橡木房间；房间离开后通知宿主

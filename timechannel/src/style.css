@@ -360,3 +360,20 @@ body {
   transition: opacity 1.1s ease;
   z-index: 80;
 }
+
+/* 终章沉浸：进入冲出/房间后，隐藏隧道的所有 HUD/标题/工具栏/时间轴 */
+body.tc-immersive #title,
+body.tc-immersive #toolbar,
+body.tc-immersive #skyPanel,
+body.tc-immersive #uploadPanel,
+body.tc-immersive #hint,
+body.tc-immersive #depth,
+body.tc-immersive #tip,
+body.tc-immersive #storyPanel,
+body.tc-immersive #timeline,
+body.tc-immersive #focusInfo,
+body.tc-immersive #dropzone {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
