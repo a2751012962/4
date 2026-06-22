@@ -11,6 +11,8 @@ import { photoMeshes } from '../world/tunnel.js';
 import { IS_HEIC, loadHeic2any } from '../album/importer.js';
 import { bind as bindTexture, getTex } from '../album/texture-pool.js';
 import { events } from '../events.js';
+import { puzzleActive, isCorrectIndex, showConfirm } from '../puzzle.js';
+import { showToast } from '../ui/toast.js';
 
 const raycaster = new THREE.Raycaster();
 const _ndc = new THREE.Vector2();
@@ -41,6 +43,11 @@ export function openFocus(mesh) {
   focusInfo.classList.add('open');
   events.emit('focus:opened');
   events.emit('interacted');
+  // 谜题：正确照片 → 显示「走进去」确认；否则提示再找
+  if (puzzleActive()) {
+    if (isCorrectIndex(focused.idx)) showConfirm(true);
+    else { showConfirm(false); showToast('好像……不是这一张。再找找。'); }
+  }
 }
 
 /* ---------- 高清原图：单槽缓存，看哪张加载哪张，换张即释放显存 ---------- */
@@ -107,6 +114,7 @@ export function closeFocus() {
   if (!focused || focusClosing) return;
   focusClosing = true;
   focusInfo.classList.remove('open');
+  showConfirm(false);
   events.emit('focus:closed');
 }
 

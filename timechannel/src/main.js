@@ -4,10 +4,13 @@
 ============================================================ */
 import * as THREE from 'three';
 import './style.css';
-import { VERSION, CFG } from './config.js';
+import { VERSION, CFG, FLYOUT, curveX, curveY } from './config.js';
 import { events } from './events.js';
 import { camera, render, renderer } from './core/stage.js';
-import { updateGodRays } from './core/godrays.js';
+import { updateGodRays, godRaysPass } from './core/godrays.js';
+import { flow } from './flow.js';
+import { startPuzzle } from './puzzle.js';
+import * as room from './world/room.js';
 import { loadDefaultPhotos, attachDemoDates, loadPersistedAlbum } from './album/album.js';
 import * as tunnel from './world/tunnel.js';
 import * as sky from './world/sky.js';
@@ -31,30 +34,76 @@ events.on('album:changed', () => {
 });
 
 /* ---------- 调试句柄 ---------- */
-window.__tc = { meteors: meteors.meteors, spawnMeteor: meteors.spawnMeteor, camera };
+window.__tc = { meteors: meteors.meteors, spawnMeteor: meteors.spawnMeteor, camera, flow, room, flyout: startFlyout };
 window.__tcFocus = () => focus.debugState();
 
-/* ---------- 主循环 ---------- */
+/* ---------- 主循环：tunnel（找照片）→ flyout（指数冲出+白场）→ room（橡木房间） ---------- */
 const clock = new THREE.Clock();
+const whiteEl = document.getElementById('tc-white');
+let flyStart = 0;
+
+// 确认正确照片 → 退出卡片、进入冲出过场
+function startFlyout() {
+  if (flow.mode !== 'tunnel') return;
+  flow.mode = 'flyout'; flyStart = performance.now();
+  focus.closeFocus();
+}
+
+// 白场峰值 → 落入橡木房间；房间离开后通知宿主
+function enterRoom() {
+  flow.mode = 'room';
+  godRaysPass.uniforms.uIntensity.value = 0;
+  room.enter(() => {
+    if (whiteEl) whiteEl.style.opacity = '1';
+    setTimeout(() => {
+      try { if (window.parent !== window) window.parent.postMessage('tc:done', '*'); } catch (_) {}
+    }, 700);
+  });
+  if (whiteEl) requestAnimationFrame(() => { whiteEl.style.opacity = '0'; }); // 白场退去，露出房间
+}
 
 function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.05);
   const t = clock.elapsedTime;
+  const m = flow.mode;
 
-  controls.update(dt, t);                                        // 行进 + 相机
-  tunnel.update(dt, t, Math.abs(controls.controls.velocity));    // 环旋转/回收/路标
-  hover.update();                                                // 悬停检测
-  tunnel.updateCards(dt, t, hover.getHovered());                 // 卡片贴墙漂浮
-  focus.update(dt, t);                                           // 聚焦覆盖 + 暗幕 + 辉光
-  sky.update(dt, t);                                             // 星云/配色/尽头的光
-  particles.update(dt, t);                                       // 光尘/星空
-  meteors.update(dt, t);                                         // 流星
-  timeline.update();                                             // HUD + 滑块
-  // 出口光束：光源投影到屏幕，强度随速度（越快洒得越强）
-  const speedNorm = Math.min(Math.abs(controls.controls.velocity) / CFG.maxSpeed, 1);
-  updateGodRays(camera, sky.getEndLightPos(), speedNorm, dt);
-  renderer.toneMappingExposure += (1.05 + speedNorm * 0.18 - renderer.toneMappingExposure) * Math.min(dt * 3, 1);
+  if (m === 'room' || m === 'done') { room.update(dt, t); render(t); return; }
+
+  controls.update(dt, t);                                        // 仅 tunnel 模式生效
+
+  let flySpeed = 0;
+  const fp = m === 'flyout' ? (performance.now() - flyStart) / 1000 : 0; // 墙钟进度，与帧率无关
+  if (m === 'flyout') {                                          // 指数加速冲向尽头
+    flySpeed = 30 + fp * fp * 130;
+    const cz = camera.position.z - flySpeed * dt;
+    camera.position.set(curveX(cz), curveY(cz), cz);
+    camera.lookAt(curveX(cz - 26), curveY(cz - 26), cz - 26);
+    camera.fov = THREE.MathUtils.lerp(camera.fov, 95, dt * 2);
+    camera.updateProjectionMatrix();
+  }
+
+  tunnel.update(dt, t, Math.abs(controls.controls.velocity) + flySpeed);
+  hover.update();
+  tunnel.updateCards(dt, t, m === 'tunnel' ? hover.getHovered() : null);
+  focus.update(dt, t);
+  sky.update(dt, t);
+  particles.update(dt, t);
+  meteors.update(dt, t);
+  timeline.update();
+
+  if (m === 'flyout') {                                          // 光束拉满 + 白场吞没
+    godRaysPass.uniforms.uLightUV.value.set(0.5, 0.5);
+    godRaysPass.uniforms.uIntensity.value = Math.min(godRaysPass.uniforms.uIntensity.value + dt * 1.6, 1.7);
+    renderer.toneMappingExposure += (2.4 - renderer.toneMappingExposure) * Math.min(dt * 2, 1);
+    const wk = Math.max(0, (fp / FLYOUT.dur - FLYOUT.whiteAt) / (1 - FLYOUT.whiteAt));
+    if (whiteEl) whiteEl.style.opacity = String(Math.min(wk * wk, 1));
+    if (fp >= FLYOUT.dur) enterRoom();
+  } else {                                                       // tunnel：出口光束随速度
+    const speedNorm = Math.min(Math.abs(controls.controls.velocity) / CFG.maxSpeed, 1);
+    updateGodRays(camera, sky.getEndLightPos(), speedNorm, dt);
+    renderer.toneMappingExposure += (1.05 + speedNorm * 0.18 - renderer.toneMappingExposure) * Math.min(dt * 3, 1);
+  }
   render(t);
 }
 
@@ -66,6 +115,7 @@ loadPersistedAlbum().then(async (hasPersistedAlbum) => {
   }
   timeline.rebuild();
   tunnel.buildTunnel();
+  startPuzzle(clock.elapsedTime, startFlyout); // 终章谜题：找正确照片 + 持续加速
   animate();
   document.getElementById('loader').classList.add('done');
   // 通知宿主页面（橡子旅馆把隧道作为最后一关嵌入）：通道已开启

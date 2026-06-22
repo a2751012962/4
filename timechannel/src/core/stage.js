@@ -25,7 +25,11 @@ export const camera = new THREE.PerspectiveCamera(72, window.innerWidth / window
 camera.position.set(0, 0, 0);
 
 export const composer = new EffectComposer(renderer);
-composer.addPass(new RenderPass(scene, camera));
+const renderPass = new RenderPass(scene, camera);
+composer.addPass(renderPass);
+
+// 切换实际渲染的场景（终章从隧道场景换到橡木房间场景，复用同一 composer/相机）
+export function setRenderScene(s) { renderPass.scene = s; }
 
 // 体积光束：在 bloom 之前，让放射的光束本身也被 bloom，"洒"得更柔
 composer.addPass(godRaysPass);

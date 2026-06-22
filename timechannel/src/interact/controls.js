@@ -7,6 +7,8 @@ import { CFG, isMobile, curveX, curveY } from '../config.js';
 import { camera, canvas } from '../core/stage.js';
 import { events } from '../events.js';
 import { isFocused, pageFocus, closeFocus, handleTap } from './focus.js';
+import { flow } from '../flow.js';
+import { rampSpeed } from '../puzzle.js';
 
 let velocity = 0;          // z 方向速度（正 = 前进/深入）
 let zoomFov = 0;           // A/D 视角缩放（FOV 偏移，负 = 拉近）
@@ -119,6 +121,8 @@ window.addEventListener('keyup', (e) => { keys[e.key] = false; keys[e.code] = fa
 
 /* ---------- 每帧：运动学 + 相机 ---------- */
 export function update(dt, t) {
+  if (flow.mode !== 'tunnel') return; // flyout/room 由各自模块接管相机
+
   // 键盘：W/S 前进后退，A/D 视角缩放（e.code 兜底，输入法无关）
   if (keys['ArrowUp'] || keys['w'] || keys['W'] || keys['KeyW']) { velocity += 38 * dt; goalZ = null; }
   if (keys['ArrowDown'] || keys['s'] || keys['S'] || keys['KeyS']) { velocity -= 38 * dt; goalZ = null; }
@@ -141,6 +145,10 @@ export function update(dt, t) {
   // 阻尼
   velocity *= Math.pow(0.32, dt);
   if (Math.abs(velocity) < 0.01 && !cruise) velocity = 0;
+
+  // 谜题进行中：持续滚动越来越快——给一个随时间升高的速度地板
+  const ramp = rampSpeed(t);
+  if (ramp > 0 && !isFocused() && goalZ === null && velocity < ramp) velocity = ramp;
 
   // 前进 = -z
   camera.position.z -= velocity * dt;

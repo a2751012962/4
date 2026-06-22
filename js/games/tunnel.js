@@ -19,8 +19,14 @@ function memoryChannel(){
     document.body.appendChild(ov);
     requestAnimationFrame(()=>ov.classList.add('on'));     /* 立刻给黑幕+加载文案，不留死屏 */
     const frame=$('tc-frame'), back=$('tc-back'), hint=$('tc-hint');
-    let ready=false, fell=false, timer=0;
+    let ready=false, fell=false, leaving=false, timer=0;
     const cleanup=()=>{ clearTimeout(timer); removeEventListener('message',onMsg); };
+    const finish=()=>{                                     /* 找到玩具钥匙离开房间 / 手动返回 → 收起，继续终章 */
+      if(leaving||fell) return; leaving=true;
+      cleanup(); back.onclick=null;
+      sfx.chime(); ov.classList.remove('on');
+      setTimeout(()=>{ ov.remove(); resolve(); },1300);
+    };
     const fallback=()=>{                                   /* 通道没开启 → 像素隧道 */
       if(fell||ready) return; fell=true;
       cleanup(); ov.remove();
@@ -37,20 +43,16 @@ function memoryChannel(){
     const showHint=text=>{ hint.textContent=text; hint.classList.add('show'); };
     const onMsg=e=>{
       if(e.source&&e.source!==frame.contentWindow) return;
+      if(e.data==='tc:done'){ ready=true; finish(); return; }  /* 隧道谜题+房间走完，离开 */
       if(e.data!=='tc:ready'||ready||fell) return;
       ready=true; clearTimeout(timer);
       ov.classList.add('ready'); sfx.chime();              /* 隧道淡入，撤掉加载文案 */
-      showHint("滚轮 / 拖动 在回忆里前进后退 · 点击照片可以靠近看");
+      showHint("在回忆里穿行 · 找到那一张「对的」照片，点开它走进去");
       setTimeout(()=>showHint("右上角 ⊕ My Photos —— 把这四年所有的照片都放进来吧"),6000);
-      setTimeout(()=>{ hint.classList.remove('show'); back.classList.add('show'); },12000);
+      setTimeout(()=>hint.classList.remove('show'),12000);
     };
     addEventListener('message',onMsg);
-    back.onclick=()=>{
-      if(fell) return; back.onclick=null;
-      cleanup();
-      sfx.chime(); ov.classList.remove('on');
-      setTimeout(()=>{ ov.remove(); resolve(); },1300);
-    };
+    back.onclick=finish;
   });
 }
 
