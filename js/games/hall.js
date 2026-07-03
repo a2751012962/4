@@ -69,15 +69,14 @@ function hallGame(){
       if(step===3) whisper("笃笃：别回头！我们殿后！", true);
       if(step===6) whisper("突突：就快到了！锁孔在发光！", true);
       if(step>=SEG){
-        over=true; clearInterval(collapse);
+        over=true; clearInterval(collapse); removeEventListener('keydown',onKey);
         redAlert(false); heartbeat(false); sfx.chime(); burstCenter();
         setTimeout(resolve,1500);
       }
     };
     $('hall-wrap').addEventListener('pointerdown',advance);
-    const onKey=e=>{ if(e.code==='Space'||e.key==='ArrowUp'){ e.preventDefault(); advance(); } };
+    /* !e.repeat：按住空格不放会以系统重复率连跳，一秒跑完全程 */
+    const onKey=e=>{ if(e.code==='Space'||e.key==='ArrowUp'){ e.preventDefault(); if(!e.repeat) advance(); } };
     addEventListener('keydown',onKey);
-    const cleanup=()=>removeEventListener('keydown',onKey);
-    const origResolve=resolve; resolve=()=>{ cleanup(); origResolve(); };
   });
 }

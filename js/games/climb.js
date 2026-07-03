@@ -20,8 +20,10 @@ function climbGame(){
     let y=GY, vy=0, grounded=true;
     let coyote=0, buffer=0, holding=false;       /* 土狼时间 / 跳跃缓冲 / 可变跳高 */
     let sx=1, sy=1, rot=0;                       /* 挤压拉伸 / 受击翻滚 */
-    let fog=-260, flagsHit=[false,false,false];
+    let fog=-260, flagsHit=[false,false,false], danger=false, lastLeft=-1;
     const rocks=[], hb=ART.sprite('hiker');
+    const bgGrad=ctx.createLinearGradient(0,0,0,H);
+    bgGrad.addColorStop(0,'#0a0d16'); bgGrad.addColorStop(1,'#141008');
 
     const press=()=>{ holding=true; buffer=8; };
     const release=()=>{ holding=false; if(vy<-4.5) vy=-4.5; };  /* 提前松手=矮跳 */
@@ -67,9 +69,7 @@ function climbGame(){
       cam.update(); if(act) P.update();
 
       cam.apply(ctx,W,H);
-      const g=ctx.createLinearGradient(0,0,0,H);
-      g.addColorStop(0,'#0a0d16'); g.addColorStop(1,'#141008');
-      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle=bgGrad; ctx.fillRect(0,0,W,H);
       for(let i=0;i<6;i++) peak(((i*260)-(dist*.14)%260), H-114, 175, 86, '#0e111a');
       for(let i=0;i<6;i++) peak(((i*230)-(dist*.32)%230), H-96, 140, 110, '#11131e');
       for(let i=0;i<6;i++) peak(((i*210)-(dist*.6)%210), H-82, 120, 126, '#171307');
@@ -128,16 +128,15 @@ function climbGame(){
       P.draw(ctx);
       cam.restore(ctx);
 
-      const danger=fog>40;
-      redAlert(danger);
-      if(danger) heartbeat(true,130);
+      const dNow=fog>40;
+      if(dNow!==danger){ danger=dNow; redAlert(danger); heartbeat(true, danger?130:95); }
       if(act && fog>118){
         fog=-200; redAlert(false); heartbeat(true,95);
         whisper("徒步熊一把拽住你：「抓紧我！」", true);
         cam.hit(.4);
       }
       const left=Math.max(0, Math.round(100-dist/GOAL*100));
-      $('cg-d').textContent=`距山顶 ${left}%`;
+      if(left!==lastLeft){ lastLeft=left; $('cg-d').textContent=`距山顶 ${left}%`; }
       if(dist>=GOAL){ over=true; finish(); return; }
       requestAnimationFrame(loop);
     }

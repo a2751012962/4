@@ -146,7 +146,7 @@ async function stageNight4(){
         <div class="l1">${CONFIG.cardLines[0]}</div>
         <div class="ln">${CONFIG.cardLines[1]}</div>
         <div class="ln">${CONFIG.cardLines[2]}</div>
-        <div class="ln">${CONFIG.cardLines[3]}${CONFIG._signedName||CONFIG.herName}</div>
+        <div class="ln">${CONFIG.cardLines[3]}${esc(CONFIG._signedName||CONFIG.herName)}</div>
       </div>
       <button class="btn" id="cb">收 下</button>
     `);
@@ -185,7 +185,7 @@ async function stageNight4(){
     setStage(`
       <div class="report">
         <h2>入 住 报 告</h2>
-        <div class="report-row"><span>住客</span><b>${CONFIG._signedName||CONFIG.herName}</b></div>
+        <div class="report-row"><span>住客</span><b>${esc(CONFIG._signedName||CONFIG.herName)}</b></div>
         <div class="report-row"><span>入住时长</span><b>${mins} 分钟</b></div>
         <div class="report-row"><span>记忆碎片</span><b>${fragments} / 4</b></div>
         <div class="report-row"><span>答错次数</span><b>${STATS.wrong} 次</b></div>

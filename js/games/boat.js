@@ -19,6 +19,10 @@ function boatGame(){
     let keyL=false, keyR=false, targetX=null;
     const ents=[];
     const bs=ART.sprite('sailor');
+    const skyNorm=ctx.createLinearGradient(0,0,0,H);
+    skyNorm.addColorStop(0,'#05060f'); skyNorm.addColorStop(1,'#0a1226');
+    const skyFlash=ctx.createLinearGradient(0,0,0,H);
+    skyFlash.addColorStop(0,'#1a2240'); skyFlash.addColorStop(1,'#0a1226');
 
     const onKey=e=>{
       if(e.key==='ArrowLeft'){ keyL=e.type==='keydown'; targetX=null; }
@@ -37,9 +41,7 @@ function boatGame(){
 
     function drawSea(){
       const fl=flash>0?.5:0;
-      const g=ctx.createLinearGradient(0,0,0,H);
-      g.addColorStop(0,flash>0?'#1a2240':'#05060f'); g.addColorStop(1,'#0a1226');
-      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle=flash>0?skyFlash:skyNorm; ctx.fillRect(0,0,W,H);
       ctx.fillStyle='rgba(232,203,143,.5)';
       for(let i=0;i<26;i++){ const sx=(i*97)%W, sy=(i*53)%140;
         ctx.globalAlpha=Math.min(1,.18+((t/22+i)%10)/26+fl); ctx.fillRect(sx,sy,2,2); }
@@ -121,7 +123,7 @@ function boatGame(){
             P.spawn({x:e.x,y:e.y,type:'ring',n:1,speed:0,life:26,r:9,color:'#e8cb8f'});
             P.spawn({x:e.x,y:e.y,n:14,speed:3,life:32,r:2.4,color:'#ffd98a',drag:.94});
             J.pop(cv, e.x/W, Math.max(.08,(e.y-26)/H), '+ 回忆之光');
-            if(score>=4){ over=true; finish(); return; }
+            if(score>=4){ over=true; finish(); }   /* 不提前return：让胜利这帧的粒子完整画完 */
           } else if(inv<=0){
             ents.splice(i,1); inv=60;
             J.hitstop(60); cam.hit(.55); screenTear(); flash=4;
@@ -135,7 +137,7 @@ function boatGame(){
 
       P.draw(ctx);
       cam.restore(ctx);
-      requestAnimationFrame(loop);
+      if(!over) requestAnimationFrame(loop);
     }
 
     function finish(){

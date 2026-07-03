@@ -5,7 +5,9 @@ const STAGE_NAMES=["序章","第一晚 · 海之房","第二晚 · 山之房","�
 const OWNED_BY_STAGE=[[],[],['sailor'],['sailor','hiker'],['sailor','hiker','onesie']];
 
 async function mainMenu(){
-  const save=loadProgress();
+  let save=loadProgress();
+  /* 损坏/越界的存档一律当没有：否则「继续 · undefined」点下去是永久黑屏 */
+  if(!(save && Number.isInteger(save.stage) && save.stage>=1 && save.stage<STAGES.length)) save=null;
   const scene=document.createElement('div');
   scene.id='menu-scene';
   scene.style.zIndex='15';   /* 内联兜底：必须压过 #stage(z10)，否则空舞台层挡住菜单按钮（防旧缓存CSS） */
@@ -27,7 +29,10 @@ async function mainMenu(){
   scene.appendChild(ui);
 
   return new Promise(res=>{
+    let started=false;
     const begin=(stageIdx)=>{
+      if(started) return; started=true;
+      ui.style.pointerEvents='none';   /* 淡出期间锁菜单：晚到的第二次点击会清档/重置碎片 */
       let soundOn=false;
       try{ soundOn=sfx.enable(); }catch(e){}
       STATS.start=Date.now();

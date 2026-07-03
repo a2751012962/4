@@ -1,5 +1,7 @@
 /* ================= 基础原语 ================= */
 function setStage(html){ stage.innerHTML = `<div class="fade-in" style="width:100%;display:flex;flex-direction:column;align-items:center;">${html}</div>`; }
+/* 用户输入插入innerHTML前必须转义（如签名） */
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function shake(){ sfx.thud(); document.body.classList.add('shake'); setTimeout(()=>document.body.classList.remove('shake'),500); }
 function whisper(text, cute=false){
   const w=document.createElement('div'); w.className='whisper'+(cute?' acorn-say':''); w.textContent=text;

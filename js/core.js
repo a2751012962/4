@@ -22,7 +22,8 @@ const sfx = (()=> {
     g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+i*.18+1.6);
     o.connect(g); g.connect(ctx.destination); o.start(ctx.currentTime+i*.18); o.stop(ctx.currentTime+i*.18+1.7); }); };
   const waves=(start)=>{ if(!ctx)return;
-    if(start && !waveGain){ const len=ctx.sampleRate*4, buf=ctx.createBuffer(1,len,ctx.sampleRate), d=buf.getChannelData(0);
+    if(start && !waveGain){ if(!on) return;
+      const len=ctx.sampleRate*4, buf=ctx.createBuffer(1,len,ctx.sampleRate), d=buf.getChannelData(0);
       for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
       const src=ctx.createBufferSource(); src.buffer=buf; src.loop=true;
       const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=420;
@@ -30,9 +31,15 @@ const sfx = (()=> {
       const lfo=ctx.createOscillator(),lg=ctx.createGain(); lfo.frequency.value=.12; lg.gain.value=.05;
       lfo.connect(lg); lg.connect(waveGain.gain);
       src.connect(f); f.connect(waveGain); waveGain.connect(ctx.destination); src.start(); lfo.start();
-    } else if(!start && waveGain){ waveGain.gain.linearRampToValueAtTime(0,ctx.currentTime+1.5); waveGain=null; } };
+      waveGain._stop=()=>{ try{ src.stop(); lfo.stop(); }catch(e){} };
+    } else if(!start && waveGain){ const g=waveGain; waveGain=null;
+      g.gain.setValueAtTime(g.gain.value,ctx.currentTime);
+      g.gain.linearRampToValueAtTime(0,ctx.currentTime+1.5);
+      /* 淡出后必须真正停掉循环源和LFO，否则LFO会把已归零的增益继续调制出声，且节点泄漏 */
+      setTimeout(()=>{ g._stop(); try{ g.disconnect(); }catch(e){} },1600); } };
   const drone=(start)=>{ if(!ctx)return;
-    if(start && !droneOsc){ droneOsc=ctx.createOscillator(); const g=ctx.createGain();
+    if(start && !droneOsc){ if(!on) return;
+      droneOsc=ctx.createOscillator(); const g=ctx.createGain();
       droneOsc.type='sawtooth'; droneOsc.frequency.value=48; g.gain.value=.016;
       const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=120;
       droneOsc.connect(f); f.connect(g); g.connect(ctx.destination); droneOsc.start(); droneOsc._g=g;
