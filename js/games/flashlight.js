@@ -70,10 +70,12 @@ function flashlightGame(){
     room.addEventListener('pointerdown',onMove);
     const timer=setInterval(()=>{
       if(overFlag) return;
+      const tEl=$('fg-t');
+      if(!tEl){ clearInterval(timer); clearInterval(breathTimer); heartbeat(false); redAlert(false); return; }  /* 舞台已被替换：自愈清理 */
       time--;
-      $('fg-t').textContent=time;
+      tEl.textContent=time;
       if(time===20){ redAlert(true); heartbeat(true,120); whisper("（光，在变弱……）"); }
-      if(time<=10) $('fg-t').style.fontSize='30px';
+      if(time<=10) tEl.style.fontSize='30px';
       if(time<=0){ // 不惩罚：旅馆“施舍”一次
         time=30; redAlert(false); heartbeat(true,85);
         shake(); screenTear();

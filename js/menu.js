@@ -36,15 +36,14 @@ async function mainMenu(){
       let soundOn=false;
       try{ soundOn=sfx.enable(); }catch(e){}
       STATS.start=Date.now();
-      if(soundOn){ $('sound-btn').style.color='#cdb27a'; $('sound-btn').style.borderColor='#cdb27a88'; }
+      setSoundUI(soundOn);
       scene.style.transition='opacity 1.6s'; scene.style.opacity=0;
       setTimeout(()=>{ scene.remove(); res(stageIdx); },1600);
     };
-    $('m-new').onclick=()=>{ clearProgress(); fragments=0; begin(0); };
+    $('m-new').onclick=()=>{ clearProgress(); setFragments(0); begin(0); };
     const c=$('m-cont');
     if(c) c.onclick=()=>{
-      fragments=Math.max(0,save.stage-1);
-      if(fragments>0) $('fragments').textContent=`记忆碎片 ${fragments} / 4`;
+      setFragments(Number.isInteger(save.fragments)?save.fragments:Math.max(0,save.stage-1));
       CONFIG._signedName=save.name||'';
       if(Array.isArray(save.eggs)) save.eggs.forEach((v,i)=>STATS.eggs[i]=!!v);
       if(typeof save.wrong==='number') STATS.wrong=save.wrong;

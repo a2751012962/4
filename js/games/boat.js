@@ -2,19 +2,10 @@
 "use strict";
 function boatGame(){
   return new Promise(resolve=>{
-    setStage(`
-      <div class="game-wrap">
-        <div class="hud"><span id="bg-score">回忆之光 0 / 4</span><span id="bg-warn"></span></div>
-        <div class="px-wrap"><canvas class="game" id="bgc" width="226" height="143"></canvas><div class="scanlines"></div></div>
-        <div class="game-tip">← → 或 拖动屏幕 移动小船 · 接住金色的光 · 避开黑色的暗礁</div>
-      </div>
-    `);
+    const {cv,ctx,W,H,P,cam}=J.pixelGame('bgc',
+      `<span id="bg-score">回忆之光 0 / 4</span><span id="bg-warn"></span>`,
+      `← → 或 拖动屏幕 移动小船 · 接住金色的光 · 避开黑色的暗礁`);
     sfx.waves(true); heartbeat(true, 70);
-    const cv=$('bgc'), ctx=cv.getContext('2d');
-    const W=678, H=429;                       /* 逻辑分辨率 */
-    ctx.imageSmoothingEnabled=false;          /* 像素核心三件套之一 */
-    ctx.scale(cv.width/W, cv.height/H);       /* 226x143 背板，3倍像素放大 */
-    const P=new J.PSys(), cam=new J.Cam();
     let px=W/2, vx=0, tilt=0, score=0, t=0, inv=0, over=false, flash=0;
     let keyL=false, keyR=false, targetX=null;
     const ents=[];
@@ -65,6 +56,7 @@ function boatGame(){
 
     function loop(){
       if(over) return;
+      if(!cv.isConnected){ over=true; cleanup(); return; }   /* 舞台被替换：自愈停止 */
       const act=!J.frozen();
       if(act){
         t++; flash=Math.max(0,flash-1);
@@ -129,8 +121,7 @@ function boatGame(){
             J.hitstop(60); cam.hit(.55); screenTear(); flash=4;
             P.spawn({x:e.x,y:e.y,type:'shard',n:9,speed:3.4,life:36,r:5,color:'#26304a',g:.18});
             P.spawn({x:px,y:by+8,n:10,speed:2.6,life:30,r:2.6,color:'rgba(159,178,221,.9)',g:.12});
-            $('bg-warn').textContent='暗礁！';
-            setTimeout(()=>{ const w=$('bg-warn'); if(w) w.textContent=''; },1200);
+            flashWarn('bg-warn','暗礁！',1200);
           }
         }
       }
@@ -140,11 +131,11 @@ function boatGame(){
       if(!over) requestAnimationFrame(loop);
     }
 
-    function finish(){
+    function cleanup(){
       removeEventListener('keydown',onKey); removeEventListener('keyup',onKey);
-      heartbeat(false); sfx.waves(false); sfx.chime(); burstCenter();
-      setTimeout(resolve,1200);
+      heartbeat(false); sfx.waves(false);
     }
+    function finish(){ cleanup(); sfx.chime(); burstCenter(); setTimeout(resolve,1200); }
     loop();
   });
 }

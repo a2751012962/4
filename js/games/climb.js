@@ -2,19 +2,11 @@
 "use strict";
 function climbGame(){
   return new Promise(resolve=>{
-    setStage(`
-      <div class="game-wrap">
-        <div class="hud"><span id="cg-d">距山顶 100%</span><span id="cg-w" style="color:#c0584a;"></span></div>
-        <div class="px-wrap"><canvas class="game" id="cgc" width="226" height="143"></canvas><div class="scanlines"></div></div>
-        <div class="game-tip">空格 / 按住屏幕 跳跃（按得越久跳得越高）· <b style="color:#c0584a;">身后的雾正在追你</b></div>
-      </div>
-    `);
-    heartbeat(true, 95);
-    const cv=$('cgc'), ctx=cv.getContext('2d');
-    const W=678, H=429, GY=H-70, PX=130;
-    ctx.imageSmoothingEnabled=false;
-    ctx.scale(cv.width/W, cv.height/H);
-    const P=new J.PSys(), cam=new J.Cam();
+    const {cv,ctx,W,H,P,cam}=J.pixelGame('cgc',
+      `<span id="cg-d">距山顶 100%</span><span id="cg-w" style="color:#c0584a;"></span>`,
+      `空格 / 按住屏幕 跳跃（按得越久跳得越高）· <b style="color:#c0584a;">身后的雾正在追你</b>`);
+    heartbeat(true, 95); sfx.wind(true);
+    const GY=H-70, PX=130;
     let t=0, dist=0, over=false;
     const GOAL=3000, speed=3.4;
     let y=GY, vy=0, grounded=true;
@@ -41,6 +33,7 @@ function climbGame(){
 
     function loop(){
       if(over) return;
+      if(!cv.isConnected){ over=true; cleanup(); return; }   /* 舞台被替换：自愈停止 */
       const act=!J.frozen();
       if(act){
         t++; dist+=speed;
@@ -99,8 +92,7 @@ function climbGame(){
           rocks.splice(i,1);
           J.hitstop(60); cam.hit(.5); screenTear(); rot=.9; fog+=90;
           P.spawn({x:PX,y:y,type:'shard',n:8,speed:3,life:34,r:4.5,color:'#241d12',g:.2});
-          $('cg-w').textContent='雾，扑近了！';
-          setTimeout(()=>{ const w=$('cg-w'); if(w) w.textContent=''; },1300);
+          flashWarn('cg-w','雾，扑近了！',1300);
         }
       }
       for(const r of rocks){
@@ -141,12 +133,12 @@ function climbGame(){
       requestAnimationFrame(loop);
     }
 
-    function finish(){
+    function cleanup(){
       removeEventListener('keydown',onKey); removeEventListener('keyup',onKey);
       removeEventListener('pointerup',release);
-      redAlert(false); heartbeat(false); sfx.chime(); burstCenter();
-      setTimeout(resolve,1200);
+      redAlert(false); heartbeat(false); sfx.wind(false);
     }
+    function finish(){ cleanup(); sfx.chime(); burstCenter(); setTimeout(resolve,1200); }
     loop();
   });
 }

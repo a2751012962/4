@@ -99,5 +99,21 @@ const J = (() => {
     setTimeout(()=>d.remove(),1500);
   };
 
-  return { ease, lerp, PSys, Cam, hitstop, frozen, pop };
+  /* ---------- 像素小游戏外壳：canvas小游戏共用（226x143背板，3倍整数放大） ---------- */
+  const pixelGame=(id, hudHtml, tipHtml)=>{
+    setStage(`
+      <div class="game-wrap">
+        <div class="hud">${hudHtml}</div>
+        <div class="px-wrap"><canvas class="game" id="${id}" width="226" height="143"></canvas><div class="scanlines"></div></div>
+        <div class="game-tip">${tipHtml}</div>
+      </div>
+    `);
+    const cv=$(id), ctx=cv.getContext('2d');
+    const W=678, H=429;                     /* 逻辑分辨率 */
+    ctx.imageSmoothingEnabled=false;
+    ctx.scale(cv.width/W, cv.height/H);
+    return { cv, ctx, W, H, P:new PSys(), cam:new Cam() };
+  };
+
+  return { ease, lerp, PSys, Cam, hitstop, frozen, pop, pixelGame };
 })();

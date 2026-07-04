@@ -41,6 +41,8 @@ function hallGame(){
     // 身后坍塌：每2.2秒吞掉一段
     const collapse=setInterval(()=>{
       if(over) return;
+      if(!hall.isConnected){ over=true; clearInterval(collapse); removeEventListener('keydown',onKey);
+        heartbeat(false); redAlert(false); return; }   /* 舞台被替换：自愈停止 */
       if(collapsed < step-1){
         const s=$('seg'+collapsed);
         if(s){ s.style.transition='opacity .5s, filter .5s'; s.style.filter='brightness(4)'; setTimeout(()=>s.style.opacity=0,180); }
@@ -48,8 +50,8 @@ function hallGame(){
       } else {
         // 追上了：闪红警告，吞掉当前段之前的，但不惩罚——熊们顶住了
         redAlert(true); shake();
-        $('hg-w').textContent='它追上来了——快跑！';
-        setTimeout(()=>{ redAlert(false); const w=$('hg-w'); if(w) w.textContent=''; },1400);
+        flashWarn('hg-w','它追上来了——快跑！',1400);
+        setTimeout(()=>redAlert(false),1400);
         if(collapsed<step){ const s=$('seg'+collapsed); if(s){ s.style.opacity=0; } collapsed++; }
       }
     },2200);
