@@ -2,26 +2,20 @@
 "use strict";
 function climbGame(){
   return new Promise(resolve=>{
-    setStage(`
-      <div class="game-wrap">
-        <div class="hud"><span id="cg-d">距山顶 100%</span><span id="cg-w" style="color:#c0584a;"></span></div>
-        <div class="px-wrap"><canvas class="game" id="cgc" width="226" height="143"></canvas><div class="scanlines"></div></div>
-        <div class="game-tip">空格 / 按住屏幕 跳跃（按得越久跳得越高）· <b style="color:#c0584a;">身后的雾正在追你</b></div>
-      </div>
-    `);
-    heartbeat(true, 95);
-    const cv=$('cgc'), ctx=cv.getContext('2d');
-    const W=678, H=429, GY=H-70, PX=130;
-    ctx.imageSmoothingEnabled=false;
-    ctx.scale(cv.width/W, cv.height/H);
-    const P=new J.PSys(), cam=new J.Cam();
+    const {cv,ctx,W,H,P,cam}=J.pixelGame('cgc',
+      `<span id="cg-d">距山顶 100%</span><span id="cg-w" style="color:#c0584a;"></span>`,
+      `空格 / 按住屏幕 跳跃（按得越久跳得越高）· <b style="color:#c0584a;">身后的雾正在追你</b>`);
+    heartbeat(true, 95); sfx.wind(true);
+    const GY=H-70, PX=130;
     let t=0, dist=0, over=false;
     const GOAL=3000, speed=3.4;
     let y=GY, vy=0, grounded=true;
     let coyote=0, buffer=0, holding=false;       /* 土狼时间 / 跳跃缓冲 / 可变跳高 */
     let sx=1, sy=1, rot=0;                       /* 挤压拉伸 / 受击翻滚 */
-    let fog=-260, flagsHit=[false,false,false];
+    let fog=-260, flagsHit=[false,false,false], danger=false, lastLeft=-1;
     const rocks=[], hb=ART.sprite('hiker');
+    const bgGrad=ctx.createLinearGradient(0,0,0,H);
+    bgGrad.addColorStop(0,'#0a0d16'); bgGrad.addColorStop(1,'#141008');
 
     const press=()=>{ holding=true; buffer=8; };
     const release=()=>{ holding=false; if(vy<-4.5) vy=-4.5; };  /* 提前松手=矮跳 */
@@ -39,6 +33,7 @@ function climbGame(){
 
     function loop(){
       if(over) return;
+      if(!cv.isConnected){ over=true; cleanup(); return; }   /* 舞台被替换：自愈停止 */
       const act=!J.frozen();
       if(act){
         t++; dist+=speed;
@@ -67,9 +62,7 @@ function climbGame(){
       cam.update(); if(act) P.update();
 
       cam.apply(ctx,W,H);
-      const g=ctx.createLinearGradient(0,0,0,H);
-      g.addColorStop(0,'#0a0d16'); g.addColorStop(1,'#141008');
-      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle=bgGrad; ctx.fillRect(0,0,W,H);
       for(let i=0;i<6;i++) peak(((i*260)-(dist*.14)%260), H-114, 175, 86, '#0e111a');
       for(let i=0;i<6;i++) peak(((i*230)-(dist*.32)%230), H-96, 140, 110, '#11131e');
       for(let i=0;i<6;i++) peak(((i*210)-(dist*.6)%210), H-82, 120, 126, '#171307');
@@ -99,8 +92,7 @@ function climbGame(){
           rocks.splice(i,1);
           J.hitstop(60); cam.hit(.5); screenTear(); rot=.9; fog+=90;
           P.spawn({x:PX,y:y,type:'shard',n:8,speed:3,life:34,r:4.5,color:'#241d12',g:.2});
-          $('cg-w').textContent='雾，扑近了！';
-          setTimeout(()=>{ const w=$('cg-w'); if(w) w.textContent=''; },1300);
+          flashWarn('cg-w','雾，扑近了！',1300);
         }
       }
       for(const r of rocks){
@@ -128,26 +120,25 @@ function climbGame(){
       P.draw(ctx);
       cam.restore(ctx);
 
-      const danger=fog>40;
-      redAlert(danger);
-      if(danger) heartbeat(true,130);
+      const dNow=fog>40;
+      if(dNow!==danger){ danger=dNow; redAlert(danger); heartbeat(true, danger?130:95); }
       if(act && fog>118){
         fog=-200; redAlert(false); heartbeat(true,95);
         whisper("徒步熊一把拽住你：「抓紧我！」", true);
         cam.hit(.4);
       }
       const left=Math.max(0, Math.round(100-dist/GOAL*100));
-      $('cg-d').textContent=`距山顶 ${left}%`;
+      if(left!==lastLeft){ lastLeft=left; $('cg-d').textContent=`距山顶 ${left}%`; }
       if(dist>=GOAL){ over=true; finish(); return; }
       requestAnimationFrame(loop);
     }
 
-    function finish(){
+    function cleanup(){
       removeEventListener('keydown',onKey); removeEventListener('keyup',onKey);
       removeEventListener('pointerup',release);
-      redAlert(false); heartbeat(false); sfx.chime(); burstCenter();
-      setTimeout(resolve,1200);
+      redAlert(false); heartbeat(false); sfx.wind(false);
     }
+    function finish(){ cleanup(); sfx.chime(); burstCenter(); setTimeout(resolve,1200); }
     loop();
   });
 }

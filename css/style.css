@@ -32,6 +32,7 @@
   }
   .btn.show { opacity:1; pointer-events:auto; }
   .btn:hover { background:#cdb27a; color:#0a0a0f; box-shadow:0 0 24px rgba(205,178,122,.35); }
+  .btn:active { transform:scale(.95); }
 
   .type-area { max-width:640px; font-size:clamp(16px,2.4vw,20px); line-height:2.3; min-height:90px; }
   .cursor::after { content:"▍"; animation:blink 1s steps(1) infinite; color:#cdb27a; }
@@ -73,6 +74,7 @@
     line-height:1.8; text-align:left;
   }
   .path-btn:hover { border-color:#cdb27a; color:#e3d8be; }
+  .path-btn:active { transform:scale(.985); }
   .path-btn.lie { opacity:.35; pointer-events:none; }
 
   .toy { font-size:clamp(58px,11vw,92px); line-height:1; filter:drop-shadow(0 0 30px rgba(205,178,122,.35)); animation:bob 3s ease-in-out infinite; }
@@ -151,6 +153,8 @@
     overflow:hidden; border:1px solid #3a3424; background:#050507; position:relative; }
   #hall { position:absolute; left:50%; top:50%; transform-style:preserve-3d;
     transition:transform 1s cubic-bezier(.45,0,.35,1); }
+  /* 关键：分段包裹层必须继续传递3D上下文，否则墙面全部被压扁成侧棱（走廊变黑箱） */
+  .seg { transform-style:preserve-3d; }
   .p3 { position:absolute; left:0; top:0; transform-origin:center; backface-visibility:hidden; }
   .wallface { background:linear-gradient(180deg,#17130c 0%,#0d0a06 70%,#070503 100%); border-top:1px solid #2c2516; border-bottom:1px solid #2c2516; }
   .wallface.breathe { animation:breathe 3.2s ease-in-out infinite; }

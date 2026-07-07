@@ -2,23 +2,18 @@
 "use strict";
 function boatGame(){
   return new Promise(resolve=>{
-    setStage(`
-      <div class="game-wrap">
-        <div class="hud"><span id="bg-score">回忆之光 0 / 4</span><span id="bg-warn"></span></div>
-        <div class="px-wrap"><canvas class="game" id="bgc" width="226" height="143"></canvas><div class="scanlines"></div></div>
-        <div class="game-tip">← → 或 拖动屏幕 移动小船 · 接住金色的光 · 避开黑色的暗礁</div>
-      </div>
-    `);
+    const {cv,ctx,W,H,P,cam}=J.pixelGame('bgc',
+      `<span id="bg-score">回忆之光 0 / 4</span><span id="bg-warn"></span>`,
+      `← → 或 拖动屏幕 移动小船 · 接住金色的光 · 避开黑色的暗礁`);
     sfx.waves(true); heartbeat(true, 70);
-    const cv=$('bgc'), ctx=cv.getContext('2d');
-    const W=678, H=429;                       /* 逻辑分辨率 */
-    ctx.imageSmoothingEnabled=false;          /* 像素核心三件套之一 */
-    ctx.scale(cv.width/W, cv.height/H);       /* 226x143 背板，3倍像素放大 */
-    const P=new J.PSys(), cam=new J.Cam();
     let px=W/2, vx=0, tilt=0, score=0, t=0, inv=0, over=false, flash=0;
     let keyL=false, keyR=false, targetX=null;
     const ents=[];
     const bs=ART.sprite('sailor');
+    const skyNorm=ctx.createLinearGradient(0,0,0,H);
+    skyNorm.addColorStop(0,'#05060f'); skyNorm.addColorStop(1,'#0a1226');
+    const skyFlash=ctx.createLinearGradient(0,0,0,H);
+    skyFlash.addColorStop(0,'#1a2240'); skyFlash.addColorStop(1,'#0a1226');
 
     const onKey=e=>{
       if(e.key==='ArrowLeft'){ keyL=e.type==='keydown'; targetX=null; }
@@ -37,9 +32,7 @@ function boatGame(){
 
     function drawSea(){
       const fl=flash>0?.5:0;
-      const g=ctx.createLinearGradient(0,0,0,H);
-      g.addColorStop(0,flash>0?'#1a2240':'#05060f'); g.addColorStop(1,'#0a1226');
-      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle=flash>0?skyFlash:skyNorm; ctx.fillRect(0,0,W,H);
       ctx.fillStyle='rgba(232,203,143,.5)';
       for(let i=0;i<26;i++){ const sx=(i*97)%W, sy=(i*53)%140;
         ctx.globalAlpha=Math.min(1,.18+((t/22+i)%10)/26+fl); ctx.fillRect(sx,sy,2,2); }
@@ -63,6 +56,7 @@ function boatGame(){
 
     function loop(){
       if(over) return;
+      if(!cv.isConnected){ over=true; cleanup(); return; }   /* 舞台被替换：自愈停止 */
       const act=!J.frozen();
       if(act){
         t++; flash=Math.max(0,flash-1);
@@ -121,28 +115,27 @@ function boatGame(){
             P.spawn({x:e.x,y:e.y,type:'ring',n:1,speed:0,life:26,r:9,color:'#e8cb8f'});
             P.spawn({x:e.x,y:e.y,n:14,speed:3,life:32,r:2.4,color:'#ffd98a',drag:.94});
             J.pop(cv, e.x/W, Math.max(.08,(e.y-26)/H), '+ 回忆之光');
-            if(score>=4){ over=true; finish(); return; }
+            if(score>=4){ over=true; finish(); }   /* 不提前return：让胜利这帧的粒子完整画完 */
           } else if(inv<=0){
             ents.splice(i,1); inv=60;
             J.hitstop(60); cam.hit(.55); screenTear(); flash=4;
             P.spawn({x:e.x,y:e.y,type:'shard',n:9,speed:3.4,life:36,r:5,color:'#26304a',g:.18});
             P.spawn({x:px,y:by+8,n:10,speed:2.6,life:30,r:2.6,color:'rgba(159,178,221,.9)',g:.12});
-            $('bg-warn').textContent='暗礁！';
-            setTimeout(()=>{ const w=$('bg-warn'); if(w) w.textContent=''; },1200);
+            flashWarn('bg-warn','暗礁！',1200);
           }
         }
       }
 
       P.draw(ctx);
       cam.restore(ctx);
-      requestAnimationFrame(loop);
+      if(!over) requestAnimationFrame(loop);
     }
 
-    function finish(){
+    function cleanup(){
       removeEventListener('keydown',onKey); removeEventListener('keyup',onKey);
-      heartbeat(false); sfx.waves(false); sfx.chime(); burstCenter();
-      setTimeout(resolve,1200);
+      heartbeat(false); sfx.waves(false);
     }
+    function finish(){ cleanup(); sfx.chime(); burstCenter(); setTimeout(resolve,1200); }
     loop();
   });
 }
