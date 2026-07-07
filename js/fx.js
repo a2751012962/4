@@ -1,7 +1,9 @@
 /* ================= 夸张特效 ================= */
-let heartbeatTimer=null;
+let heartbeatTimer=null, heartbeatBpm=0;
 function heartbeat(on, bpm=80){
+  if(on && heartbeatTimer && heartbeatBpm===bpm) return;   /* 同节奏重复调用（如每帧）不重建定时器 */
   if(heartbeatTimer){ clearInterval(heartbeatTimer); heartbeatTimer=null; }
+  heartbeatBpm=on?bpm:0;
   if(on){ heartbeatTimer=setInterval(()=>sfx.thud(), 60000/bpm); }
 }
 function redAlert(on){ $('redpulse').classList.toggle('on', on); }

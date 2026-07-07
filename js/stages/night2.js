@@ -29,6 +29,7 @@ async function stageNight2(){
       const b=document.createElement('button'); b.className='path-btn'; b.textContent=o.t;
       b.onclick=async ()=>{
         if(o.ok){
+          [...box.children].forEach(x=>x.style.pointerEvents='none');  /* 答对后的等待期内锁住其余灯，防双线剧情 */
           $('ta').innerHTML=o.r; sfx.chime(); await sleep(2400); resolve();
         } else {
           shake(); b.classList.add('lie'); $('ta').innerHTML=o.r;
@@ -55,7 +56,8 @@ async function stageNight2(){
             const b2=$('paths2');
             opts.forEach(o2=>{
               const bb=document.createElement('button'); bb.className='path-btn'+(o2.ok?'':' lie'); bb.textContent=o2.t;
-              if(o2.ok) bb.onclick=async ()=>{ $('ta').innerHTML=o2.r; sfx.chime(); await sleep(2200); resolve(); };
+              if(o2.ok) bb.onclick=async ()=>{ [...b2.children].forEach(x=>x.style.pointerEvents='none');
+                $('ta').innerHTML=o2.r; sfx.chime(); await sleep(2200); resolve(); };
               b2.appendChild(bb);
             });
           }

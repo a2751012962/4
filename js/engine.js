@@ -1,5 +1,7 @@
 /* ================= 基础原语 ================= */
 function setStage(html){ stage.innerHTML = `<div class="fade-in" style="width:100%;display:flex;flex-direction:column;align-items:center;">${html}</div>`; }
+/* 用户输入插入innerHTML前必须转义（如签名） */
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function shake(){ sfx.thud(); document.body.classList.add('shake'); setTimeout(()=>document.body.classList.remove('shake'),500); }
 function whisper(text, cute=false){
   const w=document.createElement('div'); w.className='whisper'+(cute?' acorn-say':''); w.textContent=text;
@@ -49,8 +51,17 @@ async function blackoutSay(lines){
   for(const t of lines){ bo.innerHTML=t; bo.classList.add('on'); sfx.thud(); await sleep(2400); }
   bo.classList.remove('on');
 }
-function addFragment(){ fragments++; $('fragments').textContent=`记忆碎片 ${fragments} / 4`; sfx.chime(); }
+function setFragments(n){ fragments=n; $('fragments').textContent = n>0 ? `记忆碎片 ${n} / 4` : ''; }
+function addFragment(){ setFragments(fragments+1); sfx.chime(); }
 function setNight(n){ $('night-badge').textContent = n; }
+/* 小游戏HUD瞬时警告：重复触发时重置计时，不会被上一条的定时器提前清空 */
+const _warnTimers={};
+function flashWarn(id, text, ms=1300){
+  const el=$(id); if(!el) return;
+  el.textContent=text;
+  clearTimeout(_warnTimers[id]);
+  _warnTimers[id]=setTimeout(()=>{ const w=$(id); if(w) w.textContent=''; },ms);
+}
 
 /* 统计与彩蛋 */
 const STATS = { wrong:0, eggs:[false,false,false,false], start:Date.now() };
@@ -77,7 +88,7 @@ function matches(input, answers){
 }
 
 /* 输入解谜：答错→旅馆变暗+低语；3次后给提示；5次后可跳过 */
-async function askInput({question, answers, hint, successLines}){
+async function askInput({question, answers, hint}){
   setStage(`
     <div class="type-area" id="ta"></div>
     <input class="ans-input" id="ai" autocomplete="off" placeholder="输入你的答案">

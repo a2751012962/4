@@ -6,7 +6,7 @@ let fragments = 0;
 
 /* ================= 音效 ================= */
 const sfx = (()=> {
-  let ctx=null, on=false, userOff=false, waveGain=null, droneOsc=null;
+  let ctx=null, on=false, userOff=false, waveGain=null, droneOsc=null, windGain=null;
   const ensure=()=>{ if(!ctx) ctx=new (window.AudioContext||window.webkitAudioContext)(); };
   const tick=()=>{ if(!on||!ctx)return; const o=ctx.createOscillator(),g=ctx.createGain();
     o.frequency.value=2600+Math.random()*600; g.gain.value=.012; o.connect(g); g.connect(ctx.destination);
@@ -22,7 +22,8 @@ const sfx = (()=> {
     g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+i*.18+1.6);
     o.connect(g); g.connect(ctx.destination); o.start(ctx.currentTime+i*.18); o.stop(ctx.currentTime+i*.18+1.7); }); };
   const waves=(start)=>{ if(!ctx)return;
-    if(start && !waveGain){ const len=ctx.sampleRate*4, buf=ctx.createBuffer(1,len,ctx.sampleRate), d=buf.getChannelData(0);
+    if(start && !waveGain){ if(!on) return;
+      const len=ctx.sampleRate*4, buf=ctx.createBuffer(1,len,ctx.sampleRate), d=buf.getChannelData(0);
       for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
       const src=ctx.createBufferSource(); src.buffer=buf; src.loop=true;
       const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=420;
@@ -30,9 +31,30 @@ const sfx = (()=> {
       const lfo=ctx.createOscillator(),lg=ctx.createGain(); lfo.frequency.value=.12; lg.gain.value=.05;
       lfo.connect(lg); lg.connect(waveGain.gain);
       src.connect(f); f.connect(waveGain); waveGain.connect(ctx.destination); src.start(); lfo.start();
-    } else if(!start && waveGain){ waveGain.gain.linearRampToValueAtTime(0,ctx.currentTime+1.5); waveGain=null; } };
+      waveGain._stop=()=>{ try{ src.stop(); lfo.stop(); }catch(e){} };
+    } else if(!start && waveGain){ const g=waveGain; waveGain=null;
+      g.gain.setValueAtTime(g.gain.value,ctx.currentTime);
+      g.gain.linearRampToValueAtTime(0,ctx.currentTime+1.5);
+      /* 淡出后必须真正停掉循环源和LFO，否则LFO会把已归零的增益继续调制出声，且节点泄漏 */
+      setTimeout(()=>{ g._stop(); try{ g.disconnect(); }catch(e){} },1600); } };
+  const wind=(start)=>{ if(!ctx)return;
+    if(start && !windGain){ if(!on) return;
+      const len=ctx.sampleRate*3, buf=ctx.createBuffer(1,len,ctx.sampleRate), d=buf.getChannelData(0);
+      for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+      const src=ctx.createBufferSource(); src.buffer=buf; src.loop=true;
+      const f=ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=520; f.Q.value=.7;
+      windGain=ctx.createGain(); windGain.gain.value=.035;
+      const lfo=ctx.createOscillator(),lg=ctx.createGain(); lfo.frequency.value=.19; lg.gain.value=.022;
+      lfo.connect(lg); lg.connect(windGain.gain);
+      src.connect(f); f.connect(windGain); windGain.connect(ctx.destination); src.start(); lfo.start();
+      windGain._stop=()=>{ try{ src.stop(); lfo.stop(); }catch(e){} };
+    } else if(!start && windGain){ const g=windGain; windGain=null;
+      g.gain.setValueAtTime(g.gain.value,ctx.currentTime);
+      g.gain.linearRampToValueAtTime(0,ctx.currentTime+1.2);
+      setTimeout(()=>{ g._stop(); try{ g.disconnect(); }catch(e){} },1300); } };
   const drone=(start)=>{ if(!ctx)return;
-    if(start && !droneOsc){ droneOsc=ctx.createOscillator(); const g=ctx.createGain();
+    if(start && !droneOsc){ if(!on) return;
+      droneOsc=ctx.createOscillator(); const g=ctx.createGain();
       droneOsc.type='sawtooth'; droneOsc.frequency.value=48; g.gain.value=.016;
       const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=120;
       droneOsc.connect(f); f.connect(g); g.connect(ctx.destination); droneOsc.start(); droneOsc._g=g;
@@ -45,14 +67,22 @@ const sfx = (()=> {
     g2.gain.setValueAtTime(vol*.3,ctx.currentTime); g2.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+dur*.8);
     o.connect(g); g.connect(ctx.destination); o2.connect(g2); g2.connect(ctx.destination);
     o.start(); o.stop(ctx.currentTime+dur+.05); o2.start(); o2.stop(ctx.currentTime+dur); };
-  return { toggle(){ensure(); on=!on; userOff=!on; if(!on){waves(false);drone(false);} return on;},
+  return { toggle(){ensure(); on=!on; userOff=!on; if(!on){waves(false);drone(false);wind(false);} return on;},
     enable(){ try{ ensure(); if(ctx.state==='suspended')ctx.resume(); if(!userOff) on=true; }catch(e){ on=false; } return on; },
     isOn(){ return on; },
-    tick,thud,chime,waves,drone,note };
+    tick,thud,chime,waves,drone,wind,note };
 })();
-function toggleSound(){ const on=sfx.toggle();
+/* 声音按钮状态的唯一写入口（toggle与菜单启动共用） */
+function setSoundUI(on){
   $('sound-btn').style.color = on?'#cdb27a':'#7d7060';
-  $('sound-btn').style.borderColor = on?'#cdb27a88':'#3c352644'; }
+  $('sound-btn').style.borderColor = on?'#cdb27a88':'#3c352644';
+}
+function toggleSound(){ setSoundUI(sfx.toggle()); }
+/* 悬停轻响：进入按钮时tick一下（触屏无hover，自然跳过） */
+addEventListener('pointerover',e=>{
+  const b=e.target.closest && e.target.closest('.btn.show,.path-btn');
+  if(b && !(e.relatedTarget && b.contains(e.relatedTarget))) sfx.tick();
+});
 
 /* ============ 全局错误可视化（排查用） ============ */
 function showErr(msg){
