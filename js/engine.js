@@ -65,7 +65,7 @@ function plantEgg(i, container){
   e.onclick=()=>{ STATS.eggs[i]=true; sfx.chime();
     burst(e.getBoundingClientRect().left+14, e.getBoundingClientRect().top+16, 12);
     e.remove();
-    whisper(`（你捡到了一颗小橡子……${eggCount()}/4。它好像不属于这家旅馆。）`);
+    whisper(`（你捡到一颗小橡子……${eggCount()}/4。它不在旅馆的账上。）`);
   };
   container.appendChild(e);
 }
@@ -88,10 +88,10 @@ async function askInput({question, answers, hint, successLines}){
   let wrong=0;
   const wrongLines=[
     "（旅馆的灯，暗了一格。）",
-    "（走廊深处传来翻动纸张的声音——登记簿在记录你的错误。）",
-    "（低语：再想想……那一天，你真的忘了吗？）",
-    "（笃笃从墙缝探出头：宿主别慌！再想想嘛！）",
-    "（突突小声说：答不出也没关系，它不会怪你的。）"
+    "（走廊深处，登记簿哗啦翻过一页——它在记你的错误。）",
+    "（低语：再想想。那一天，你其实没有忘。）",
+    "（笃笃从墙缝探出头：别慌别慌！再想一次！）",
+    "（突突：（小小声）……答不出也没关系的，它不会怪你。）"
   ];
   /* 先绑定处理器再打字：问题还没打完时，确认/回车也已可用 */
   const done=new Promise(res=>{
@@ -135,7 +135,7 @@ async function memoryScene(night){
 async function collectorNote(i){
   const n=CONFIG.collectorNotes[i];
   setStage(`
-    <p class="sub" style="margin-bottom:20px;">门缝下面，被塞进来一张纸条。</p>
+    <p class="sub" style="margin-bottom:20px;">一张纸条，安安静静地等在你必经的路上。</p>
     <div class="note-paper">
       ${n.slice(0,-1).map(l=>`<div>${l}</div>`).join("")}
       <div class="sig">${n[n.length-1]}</div>

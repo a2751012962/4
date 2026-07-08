@@ -13,6 +13,7 @@
 - `js/stages/` — 五个章节剧本（intro / night1-4），每章一个文件
 - `js/menu.js` — 主菜单与存档入口
 - `js/app.js` — 启动器
+- `story/` — 故事文档（设定集 / 大纲与伏笔台账 / 审查报告），按 [webnovel-writer](https://github.com/lingfengQAQ/webnovel-writer) 方法论编写
 
 ## 本地运行
 直接用浏览器打开 index.html 即可。
