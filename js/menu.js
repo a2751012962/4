@@ -6,6 +6,8 @@ const OWNED_BY_STAGE=[[],[],[],['sailor'],['sailor','hiker'],['sailor','hiker','
 
 async function mainMenu(){
   let save=loadProgress();
+  /* v1旧存档写于「水墨流云」插入STAGES之前：晚间章节下标整体+1，迁移后再校验 */
+  if(save && !save.v && Number.isInteger(save.stage) && save.stage>=1) save.stage+=1;
   /* 损坏/越界的存档一律当没有：否则「继续 · undefined」点下去是永久黑屏 */
   if(!(save && Number.isInteger(save.stage) && save.stage>=1 && save.stage<STAGES.length)) save=null;
   const scene=document.createElement('div');
@@ -43,7 +45,7 @@ async function mainMenu(){
     $('m-new').onclick=()=>{ clearProgress(); setFragments(0); begin(0); };
     const c=$('m-cont');
     if(c) c.onclick=()=>{
-      setFragments(Number.isInteger(save.fragments)?save.fragments:Math.max(0,save.stage-1));
+      setFragments(Number.isInteger(save.fragments)?save.fragments:Math.max(0,save.stage-2));   /* night1=下标2起，每过一晚+1枚碎片 */
       CONFIG._signedName=save.name||'';
       if(Array.isArray(save.eggs)) save.eggs.forEach((v,i)=>STATS.eggs[i]=!!v);
       if(typeof save.wrong==='number') STATS.wrong=save.wrong;

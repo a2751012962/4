@@ -71,7 +71,8 @@ function flashlightGame(){
     const timer=setInterval(()=>{
       if(overFlag) return;
       const tEl=$('fg-t');
-      if(!tEl){ clearInterval(timer); clearInterval(breathTimer); heartbeat(false); redAlert(false); return; }  /* 舞台已被替换：自愈清理 */
+      if(!tEl){ clearInterval(timer); clearInterval(breathTimer); heartbeat(false); redAlert(false);
+        sfx.drone(false); removeEventListener('resize',recalc); return; }  /* 舞台已被替换：自愈清理（连同环境音与resize监听） */
       time--;
       tEl.textContent=time;
       if(time===20){ redAlert(true); heartbeat(true,120); whisper("（光，在变弱……）"); }

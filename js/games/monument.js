@@ -12,7 +12,7 @@ function monumentGame(){
 
     /* ---------- 2. overlay + UI ---------- */
     const ov=document.createElement('div');
-    ov.style.cssText='position:fixed;inset:0;z-index:9999;background:#040812;overflow:hidden';
+    ov.style.cssText='position:fixed;inset:0;z-index:900;background:#040812;overflow:hidden';   /* 低于#errbox(999)：关卡内报错仍可见 */
     document.body.appendChild(ov);
 
     const skipBtn=document.createElement('div');
@@ -413,6 +413,7 @@ function monumentGame(){
     let actx=null, droneNodes=null;
     function ac(){
       try{
+        if(typeof sfx!=='undefined' && sfx.isOn && !sfx.isOn()) return null;   /* 尊重全局静音开关 */
         if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)();
         if(actx.state==='suspended') actx.resume();
         return actx;
@@ -716,7 +717,9 @@ function monumentGame(){
       skipBtn.removeEventListener('click',onSkip);
       window.removeEventListener('resize',onResize);
       SND.droneStop();
+      setTimeout(()=>{ try{ if(actx) actx.close(); }catch(e){} },1600);   /* 等droneStop淡出结束后释放AudioContext */
       try{
+        sun.shadow.dispose();   /* 2048²阴影贴图不在renderer.dispose()覆盖范围内 */
         rtScene.dispose(); rtA.dispose(); rtB.dispose();
         scene.traverse(o=>{ if(o.geometry) o.geometry.dispose(); });
         Object.keys(MAT).forEach(k=>MAT[k].dispose());

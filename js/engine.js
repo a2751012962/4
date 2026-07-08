@@ -185,6 +185,7 @@ function gainCompanion(k){
 const SAVE_KEY='acorn_hotel_save';
 function saveProgress(stage){
   try{ localStorage.setItem(SAVE_KEY, JSON.stringify({
+    v:2,   /* 存档版本：v2起STAGES含「水墨流云」（night1从下标2开始） */
     stage, fragments, name: CONFIG._signedName||'',
     eggs: STATS.eggs, wrong: STATS.wrong })); }catch(e){}
 }

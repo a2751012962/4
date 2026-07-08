@@ -107,7 +107,7 @@ function boatGame(){
       if(act) for(let i=ents.length-1;i>=0;i--){
         const e=ents[i];
         if(e.y>H+30){ ents.splice(i,1); continue; }
-        if(Math.abs(e.x-px)<32 && Math.abs(e.y-by)<26){
+        if(!over && Math.abs(e.x-px)<32 && Math.abs(e.y-by)<26){   /* 胜利后不再结算碰撞：防二次finish与胜利后暗礁特效 */
           if(e.light){
             score++; ents.splice(i,1);
             $('bg-score').textContent=`回忆之光 ${score} / 4`;

@@ -40,7 +40,7 @@ function inkwashGame(){
       </div>`;
     document.body.appendChild(root);
     /* 进入时隐藏会穿透的游戏浮层 */
-    const hidden=['night-badge','fragments'].map(id=>$(id)).filter(Boolean);
+    const hidden=['night-badge','fragments','hud-companions'].map(id=>$(id)).filter(Boolean);
     hidden.forEach(el=>{ el.dataset._inkDisp=el.style.display; el.style.display='none'; });
     sfx.drone(true);
 
@@ -83,6 +83,12 @@ function inkwashGame(){
     let halfFloat, supportLinear;
     if (isWebGL2){ gl.getExtension('EXT_color_buffer_float'); supportLinear=!!gl.getExtension('OES_texture_float_linear'); }
     else { halfFloat=gl.getExtension('OES_texture_half_float'); supportLinear=!!gl.getExtension('OES_texture_half_float_linear'); }
+    if (!isWebGL2 && !halfFloat){   /* WebGL1且无半浮点纹理：走无WebGL的收笔兜底，不能抛错卡死章节流程 */
+      root.querySelector('#ink-hint').textContent='此设备不支持 WebGL，可直接「收笔」继续';
+      root.querySelector('#ink-hint').classList.remove('gone');
+      root.querySelector('#ink-done').addEventListener('click', teardown);
+      return;
+    }
     const HALF_FLOAT = isWebGL2 ? gl.HALF_FLOAT : halfFloat.HALF_FLOAT_OES;
 
     function getFormat(internal, format){

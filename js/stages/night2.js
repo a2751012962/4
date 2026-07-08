@@ -76,7 +76,8 @@ async function stageNight2(){
     "徒步熊把灯递给你：",
     "「有什么东西在等你转动它。慢慢看。」"
   ],"前 往 旋 塔",58);
-  await monumentGame();
+  /* three.js（js/vendor/three.min.js）意外缺失时退回原攀登跑酷，避免关卡被静默跳过 */
+  await (typeof THREE!=='undefined' ? monumentGame() : climbGame());
   await screenType([
     "光门的那一边，是普通的走廊。",
     "徒步熊在后面跟来，把灯收起来：",
