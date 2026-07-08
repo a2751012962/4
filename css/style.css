@@ -306,3 +306,76 @@ canvas.game { image-rendering: pixelated; image-rendering: crisp-edges; }
   15%{opacity:1; transform:translate(-50%,-50%) scale(1.15)}
   30%{transform:translate(-50%,-60%) scale(1)}
   100%{opacity:0; transform:translate(-50%,-150%)} }
+
+/* ============ 创意环节 · 水墨流云（移植自 shuimo-liuyun，全部作用域到 #ink-stage） ============ */
+#ink-stage{
+  position:fixed; inset:0; z-index:55; overflow:hidden;  /* 高于 #grain(51)/#vignette(50)：创意环节保持宣纸明亮，不被颗粒/暗角压暗 */
+  --xuan:#f2ecdf; --mo:#1c1c22; --dai:#1c4b7d; --zhu:#c23b2e; --zhuq:#3a7d5d; --teng:#c9941a;
+  --line:rgba(28,28,34,.18);
+  background:var(--xuan); color:var(--mo);
+  font-family:"Noto Serif SC","Songti SC","STSong",serif;
+}
+#ink-stage #ink-c{ display:block; width:100vw; height:100vh; cursor:crosshair; touch-action:none; }
+#ink-stage .ink-title{ position:absolute; top:28px; left:26px; z-index:5; pointer-events:none;
+  writing-mode:vertical-rl; display:flex; gap:14px; align-items:flex-start; }
+#ink-stage .ink-title h1{ font-family:"Ma Shan Zheng","Noto Serif SC",serif; font-size:clamp(28px,3.6vw,44px);
+  font-weight:400; letter-spacing:.34em; color:var(--mo); }
+#ink-stage .ink-title .sub{ font-size:11px; letter-spacing:.32em; color:rgba(28,28,34,.55); padding-top:6px; }
+#ink-stage .ink-title::after{ content:""; display:block; width:1px; align-self:stretch;
+  background:linear-gradient(to bottom,var(--line),transparent); margin-right:2px; }
+#ink-stage .ink-seal{ position:absolute; left:30px; top:calc(28px + clamp(190px,30vh,300px)); z-index:5; pointer-events:none;
+  width:34px; height:34px; border-radius:5px; background:linear-gradient(135deg,#c0392b,#9d2b20); color:#f6efe2;
+  display:flex; align-items:center; justify-content:center; writing-mode:vertical-rl; font-family:"Ma Shan Zheng",serif;
+  font-size:14px; letter-spacing:.1em; line-height:1; transform:rotate(-3deg); box-shadow:0 1px 4px rgba(157,43,32,.35); opacity:.92; }
+#ink-stage .ink-poem{ position:absolute; top:34px; right:30px; z-index:5; pointer-events:none;
+  writing-mode:vertical-rl; display:flex; gap:16px; font-size:14px; letter-spacing:.52em; color:rgba(28,28,34,.34); }
+#ink-stage .ink-poem .poem-en{ font-size:9.5px; letter-spacing:.18em; color:rgba(28,28,34,.42); font-family:"Noto Serif SC",serif; }
+#ink-stage .ink-hint{ position:absolute; left:50%; top:46%; transform:translate(-50%,-50%); z-index:5; pointer-events:none;
+  text-align:center; font-size:13px; letter-spacing:.46em; text-indent:.46em; color:rgba(28,28,34,.5); transition:opacity 1.6s ease; }
+#ink-stage .ink-hint.gone{ opacity:0; }
+#ink-stage .ink-dock{ position:absolute; left:50%; bottom:26px; transform:translateX(-50%); z-index:6;
+  display:flex; align-items:center; gap:22px; padding:12px 22px; background:rgba(242,236,223,.62);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border:1px solid var(--line); border-radius:999px; max-width:94vw; flex-wrap:wrap; justify-content:center; }
+#ink-stage .inks{ display:flex; align-items:center; gap:14px; }
+#ink-stage .ink{ appearance:none; border:none; cursor:pointer; position:relative; width:24px; height:24px; border-radius:50%;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.25), 0 1px 3px rgba(28,28,34,.25); transition:transform .25s cubic-bezier(.2,.9,.3,1.4); }
+#ink-stage .ink:hover{ transform:scale(1.18); }
+#ink-stage .ink::after{ content:""; position:absolute; inset:-6px; border-radius:50%; border:1px solid transparent; transition:border-color .25s ease; }
+#ink-stage .ink[aria-pressed="true"]::after{ border-color:rgba(28,28,34,.55); }
+#ink-stage .ink .lbl{ position:absolute; top:-26px; left:50%; transform:translateX(-50%); font-size:10px; letter-spacing:.2em;
+  color:rgba(28,28,34,.6); opacity:0; transition:opacity .2s; white-space:nowrap; font-family:inherit; }
+#ink-stage .ink:hover .lbl, #ink-stage .ink[aria-pressed="true"] .lbl{ opacity:1; }
+#ink-stage .ink-lun{ background:conic-gradient(var(--mo),var(--dai),var(--zhuq),var(--teng),var(--zhu),var(--mo)); }
+#ink-stage .ink-mo{ background:radial-gradient(circle at 35% 30%, #3c3c46, var(--mo)); }
+#ink-stage .ink-dai{ background:radial-gradient(circle at 35% 30%, #2f6cab, var(--dai)); }
+#ink-stage .ink-zhu{ background:radial-gradient(circle at 35% 30%, #de5c4b, var(--zhu)); }
+#ink-stage .ink-zhuq{ background:radial-gradient(circle at 35% 30%, #56a07c, var(--zhuq)); }
+#ink-stage .ink-teng{ background:radial-gradient(circle at 35% 30%, #e8b94a, var(--teng)); }
+#ink-stage .sep{ width:1px; height:22px; background:var(--line); }
+#ink-stage .act{ appearance:none; background:none; border:none; cursor:pointer; font-family:inherit; font-size:12px;
+  letter-spacing:.18em; color:rgba(28,28,34,.78); padding:4px 2px; position:relative; display:inline-flex; align-items:center; gap:7px; white-space:nowrap; }
+#ink-stage .act::after{ content:""; position:absolute; left:10%; right:10%; bottom:-2px; height:1px; background:var(--mo);
+  transform:scaleX(0); transform-origin:center; transition:transform .3s ease; }
+#ink-stage .act:hover::after{ transform:scaleX(1); }
+#ink-stage .act[aria-pressed="false"]{ color:rgba(28,28,34,.38); }
+#ink-stage .act .dot{ width:7px; height:7px; border-radius:50%; flex:none; background:var(--zhu);
+  box-shadow:0 0 6px rgba(194,59,46,.5); transition:background .3s,box-shadow .3s; }
+#ink-stage .act[aria-pressed="false"] .dot{ background:transparent; box-shadow:none; border:1px solid rgba(28,28,34,.35); }
+#ink-stage .act.ink-done{ color:#9d2b20; font-weight:700; }
+#ink-stage .ink-fanOverlay{ position:absolute; inset:0; z-index:20; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:26px;
+  background:rgba(242,236,223,.78); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); opacity:0; transition:opacity .6s ease; }
+#ink-stage .ink-fanOverlay.show{ opacity:1; }
+#ink-stage .ink-fanOverlay[hidden]{ display:none; }
+#ink-stage .fanWrap{ display:flex; flex-direction:column; align-items:center; gap:22px; transform:translateY(46px); transition:transform 1.1s cubic-bezier(.2,.8,.25,1); }
+#ink-stage .ink-fanOverlay.show .fanWrap{ transform:translateY(0); }
+#ink-stage #ink-fanCanvas{ width:min(78vw,760px); height:auto; filter:drop-shadow(0 18px 30px rgba(28,28,34,.28)); }
+#ink-stage .fanCaption{ font-size:14px; letter-spacing:.6em; text-indent:.6em; color:rgba(28,28,34,.62); }
+#ink-stage .fanActs{ display:flex; align-items:center; gap:26px; }
+@media (max-width:640px){
+  #ink-stage .ink-title{ top:20px; left:16px; }
+  #ink-stage .ink-seal{ left:20px; top:calc(20px + 170px); width:28px; height:28px; font-size:12px; }
+  #ink-stage .ink-poem{ display:none; }
+  #ink-stage .ink-dock{ gap:12px; padding:10px 14px; }
+  #ink-stage .act{ font-size:11px; letter-spacing:.12em; }
+  #ink-stage .inks{ gap:11px; }
+}
