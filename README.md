@@ -9,7 +9,9 @@
 - `js/core.js` — 基础工具 + WebAudio 音效
 - `js/engine.js` — 场景/打字机/问答引擎
 - `js/fx.js` — 特效（故障字、红色警报、心跳、粒子）
-- `js/games/` — 四晚小游戏（行船 / 跑酷 / 手电筒 / 3D走廊）
+- `js/vendor/three.min.js` — Three.js r128（本地引入，file:// 直接可用）
+- `js/three-core.js` — Three.js 公共层（像素/高清渲染器、中文纹理、镜头震动、粒子）
+- `js/games/` — 四晚小游戏，全部为 Three.js 真3D 渲染（夜海行船 / 雾墙攀登 / 手电筒暗房 / 第一人称坍塌走廊）
 - `js/stages/` — 五个章节剧本（intro / night1-4），每章一个文件
 - `js/menu.js` — 主菜单与存档入口
 - `js/app.js` — 启动器
