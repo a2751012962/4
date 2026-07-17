@@ -21,6 +21,7 @@ async function mainMenu(){
     <div class="menu-btns">
       <button class="btn show" id="m-new">${save&&save.stage>0?'重 新 开 始':'收 信 · 入 住'}</button>
       ${save&&save.stage>0?`<button class="btn show" id="m-cont">继续 · ${STAGE_NAMES[save.stage]}</button>`:''}
+      <button class="btn show" id="m-cases">谜 案 集${mkDoneCount()>0?` · ${mkDoneCount()}/${MURDOKU_CASES.length}`:''}</button>
     </div>
     <p class="menu-sub" style="margin-top:22px;font-size:11px;">建议佩戴耳机 · 右上角 ♪ 开关音效 · 时长约20分钟</p>
   `;
@@ -36,6 +37,16 @@ async function mainMenu(){
       setTimeout(()=>{ scene.remove(); res(stageIdx); },1600);
     };
     $('m-new').onclick=()=>{ clearProgress(); fragments=0; begin(0); };
+    $('m-cases').onclick=async()=>{
+      try{ sfx.enable(); }catch(e){}
+      sfx.thud();
+      scene.style.display='none';            /* 菜单(z15)盖住 #stage(z10)，进入前须隐藏 */
+      await murdokuMode();
+      stage.innerHTML='';
+      scene.style.display='';                 /* 菜单原样恢复，mainMenu 的 Promise 仍在等待 */
+      const b=$('m-cases');
+      if(b) b.textContent=`谜 案 集${mkDoneCount()>0?` · ${mkDoneCount()}/${MURDOKU_CASES.length}`:''}`;
+    };
     const c=$('m-cont');
     if(c) c.onclick=()=>{
       fragments=Math.max(0,save.stage-1);
